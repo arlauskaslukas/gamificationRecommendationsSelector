@@ -8,6 +8,7 @@ interface RequestBody {
 }
 
 interface RecRow {
+  id?: number;
   disorder: string;
   recommendation: string;
   elementUsabilityRecommendation: string | null;
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
           disorder: disorders?.length ? { in: disorders } : undefined,
         },
         select: {
+          id: true,
           gamificationElement: true,
           disorder: true,
           wcagRecommendation: true,
@@ -50,6 +52,7 @@ export async function POST(req: NextRequest) {
         gamificationElement: { in: elements },
       },
       select: {
+        id: true,
         gamificationElement: true,
         isoRecommendation: true,
         elementUsabilityRecommendation: true,
@@ -61,12 +64,14 @@ export async function POST(req: NextRequest) {
   const normalised: InitialRow[] = [
     ...wcagRows.map(
       (r: {
+        id: any; // not used, but needed for type consistency
         gamificationElement: any;
         disorder: any;
         wcagRecommendation: any;
         elementUsabilityRecommendation: any;
         example: any;
       }) => ({
+        id: r.id, // not used, but needed for type consistency
         gamificationElement: r.gamificationElement,
         disorder: r.disorder,
         recommendation: r.wcagRecommendation,
@@ -76,11 +81,13 @@ export async function POST(req: NextRequest) {
     ),
     ...isoRows.map(
       (r: {
+        id: any; // not used, but needed for type consistency
         gamificationElement: any;
         isoRecommendation: any;
         elementUsabilityRecommendation: any;
         example: any;
       }) => ({
+        id: r.id, // not used, but needed for type consistency
         gamificationElement: r.gamificationElement,
         disorder: "-", // spec requirement
         recommendation: r.isoRecommendation,
@@ -96,6 +103,7 @@ export async function POST(req: NextRequest) {
     const key = rec.gamificationElement;
     if (!groupedMap.has(key)) groupedMap.set(key, []);
     groupedMap.get(key)!.push({
+      id: rec.id,
       disorder: rec.disorder,
       recommendation: rec.recommendation,
       elementUsabilityRecommendation: rec.elementUsabilityRecommendation,

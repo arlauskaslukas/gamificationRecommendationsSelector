@@ -22,26 +22,32 @@ export interface GamificationElementRow {
 
 export interface ElementsType {
   suitable: {
-    name: string;
+    element: GamificationElement;
     selected: boolean;
   }[]; // plain names
   notSuitable: {
-    name: string;
+    element: GamificationElement;
     selected: boolean;
   }[]; // plain names
   other: {
-    name: string;
+    element: GamificationElement;
     selected: boolean;
   }[]; // plain names
 }
 
+export interface GamificationElement {
+  id: number;
+  gamificationElement: string;
+}
+
 export interface ElementsResponse {
-  suitable: string[];
-  notSuitable: string[];
-  other: string[];
+  suitable: GamificationElement[];
+  notSuitable: GamificationElement[];
+  other: GamificationElement[];
 }
 /** One individual recommendation row (ISO or WCAG) */
 export interface RecRow {
+  id: number; // unique ID for the row
   disorder: string; // '-' for ISO rows
   recommendation: string; // renamed WCAG/ISO text
   elementUsabilityRecommendation: string | null;
@@ -56,3 +62,22 @@ export interface ElementBlock {
 
 /** Entire API payload */
 export type ElementsRecResponse = ElementBlock[];
+
+type SavedResultType = {
+  name: string;
+  generalisedRecommendations: RecommendationSavedType[];
+  elements: ElementSelectionStatus[];
+  usabilityRecommendationsForGamificationElementsIso: RecommendationSavedType[];
+  notSuitableElements: ElementSelectionStatus[];
+  savedUsabilityRecommendationsForGamificationElementsWcag: RecommendationSavedType[];
+};
+
+type RecommendationSavedType = {
+  id: number;
+  status?: RecommendationStatus;
+};
+
+type ElementSelectionStatus = {
+  id: number;
+  status: boolean;
+};

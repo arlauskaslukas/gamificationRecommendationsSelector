@@ -1,31 +1,54 @@
 "use client";
 import {
   Criteria,
+  ElementSelectionStatus,
   ElementsRecResponse,
   ElementsResponse,
   ElementsType,
+  RecommendationSavedType,
+  RecRow,
 } from "@/app/types/types";
 import AccordionItem from "../Accordion/Accordion";
 import Button from "../Button/Button";
 import ButtonPillToggle from "../ButtonPillToggle/ButtonPillToggle";
 import RecommendationElementCard from "../RecommendationElementCard/RecommendationElementCard";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { fetchGamificationElements } from "@/app/lib/api/fetchGamificationElements";
 import { fetchElementRecommendations } from "@/app/lib/api/fetchRecommendationsForElements";
+import { RecommendationStatus } from "@prisma/client";
 
 interface Props {
   criteria: Criteria;
+  backproppedElements: (elements: ElementsType) => void;
+  selectedElements?: ElementSelectionStatus[];
+  selectedUnusableElements?: ElementSelectionStatus[];
+  selectedISORecommendations: RecommendationSavedType[];
+  selectedWCAGRecommendations: RecommendationSavedType[];
+  selectedUnusableElementsHandler: (elements: ElementsType) => void;
+  selectedSpecificRecommendationsHandler: (
+    isoRecommendations: RecommendationSavedType[],
+    wcagRecommendations: RecommendationSavedType[]
+  ) => void;
+  elements: ElementsType;
+  setElements: Dispatch<SetStateAction<ElementsType>>;
+  recommendations: ElementsRecResponse;
+  setRecommendations: Dispatch<SetStateAction<ElementsRecResponse>>;
 }
 
-export default function RecommendationsForElementsSection({ criteria }: Props) {
-  const [elements, setElements] = useState<ElementsType>({
-    suitable: [],
-    notSuitable: [],
-    other: [],
-  });
-  const [recommendations, setRecommendations] = useState<ElementsRecResponse>(
-    []
-  ); // TODO: Define the type for recommendations
+export default function RecommendationsForElementsSection({
+  criteria,
+  backproppedElements,
+  selectedElements,
+  selectedUnusableElements,
+  selectedISORecommendations,
+  selectedWCAGRecommendations,
+  selectedUnusableElementsHandler,
+  selectedSpecificRecommendationsHandler,
+  elements,
+  setElements,
+  recommendations,
+  setRecommendations,
+}: Props) {
   const [elementsLoaded, setElementsLoaded] = useState(false);
   const [recommendationsLoaded, setRecommendationsLoaded] = useState(false);
   const getElements = async () => {
@@ -34,15 +57,15 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
       console.log(res);
       if (res) {
         let suitable = res.suitable.map((element) => ({
-          name: element,
+          element: element,
           selected: true,
         }));
         let notSuitable = res.notSuitable.map((element) => ({
-          name: element,
+          element: element,
           selected: false,
         }));
         let other = res.other.map((element) => ({
-          name: element,
+          element: element,
           selected: false,
         }));
         setElements({
@@ -54,20 +77,74 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
       }
     });
   };
+  const getItemSelectionStatus = (rec: RecRow) => {
+    return rec.recommendation.includes("ISO")
+      ? selectedISORecommendations?.find((item) => item.id === rec.id)
+          ?.status ?? null
+      : selectedWCAGRecommendations?.find((item) => item.id === rec.id)
+          ?.status ?? null;
+  };
+  const handleRecommendationSelect = (
+    rec: RecRow,
+    status: RecommendationStatus
+  ) => {
+    if (rec.recommendation.includes("ISO")) {
+      let iso = selectedISORecommendations.map((r) =>
+        r.id == rec.id ? { ...r, status } : r
+      );
+      selectedSpecificRecommendationsHandler(iso, selectedWCAGRecommendations);
+    } else {
+      let wcag = selectedWCAGRecommendations.map((r) =>
+        r.id == rec.id ? { ...r, status } : r
+      );
+      selectedSpecificRecommendationsHandler(selectedISORecommendations, wcag);
+    }
+  };
+
   const getRecommendationsForElements = async () => {
     setRecommendationsLoaded(false);
     const chosenNames = [
-      ...elements.suitable.filter((x) => x.selected).map((x) => x.name),
+      ...elements.suitable
+        .filter((x) => x.selected)
+        .map((x) => x.element.gamificationElement),
 
-      ...elements.notSuitable.filter((x) => x.selected).map((x) => x.name),
+      ...elements.notSuitable
+        .filter((x) => x.selected)
+        .map((x) => x.element.gamificationElement),
 
-      ...elements.other.filter((x) => x.selected).map((x) => x.name),
+      ...elements.other
+        .filter((x) => x.selected)
+        .map((x) => x.element.gamificationElement),
     ];
     await fetchElementRecommendations({
       disorders: criteria.disorder,
       elements: chosenNames,
     }).then((res) => {
       console.log(res);
+      let iso: RecommendationSavedType[] = [];
+      let wcag: RecommendationSavedType[] = [];
+      res.forEach((el) => {
+        iso = [
+          ...iso,
+          ...el.recommendations
+            .filter((row) => row.recommendation.includes("ISO"))
+            .map((r) => ({
+              id: r.id,
+              status: null,
+            })),
+        ];
+        wcag = [
+          ...wcag,
+          ...el.recommendations
+            .filter((row) => !row.recommendation.includes("ISO"))
+            .map((r) => ({
+              id: r.id,
+              status: null,
+            })),
+        ];
+      });
+      selectedSpecificRecommendationsHandler(iso, wcag);
+
       if (res) {
         setRecommendations(res);
         setRecommendationsLoaded(true);
@@ -82,6 +159,16 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
       ),
     }));
   };
+
+  const handleUnusedElementsSelect = (index: number) => {
+    handleSelect("notSuitable", index);
+    selectedUnusableElementsHandler(elements);
+  };
+
+  useEffect(() => {
+    backproppedElements(elements);
+  }, [elements]);
+
   return (
     <div className="px-2 py-4 w-full bg-gray-200">
       <div className="flex px-2 flex-row justify-between items-center">
@@ -102,7 +189,7 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
             key={index}
             selected={element.selected}
             notSuitable={false}
-            label={element.name}
+            label={element.element.gamificationElement}
             onClick={() => {
               handleSelect("suitable", index);
             }}
@@ -124,7 +211,7 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
             key={index}
             selected={element.selected}
             notSuitable={false}
-            label={element.name}
+            label={element.element.gamificationElement}
             onClick={() => {
               handleSelect("other", index);
             }}
@@ -135,9 +222,9 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
             key={index}
             selected={element.selected}
             notSuitable={true}
-            label={element.name}
+            label={element.element.gamificationElement}
             onClick={() => {
-              handleSelect("notSuitable", index);
+              handleUnusedElementsSelect(element.element.id);
             }}
           />
         ))}
@@ -165,6 +252,11 @@ export default function RecommendationsForElementsSection({ criteria }: Props) {
             {rec.recommendations.map((recommendation, index) => (
               <RecommendationElementCard
                 key={index}
+                status={getItemSelectionStatus(recommendation)}
+                onClick={(value: RecommendationStatus) => {
+                  handleRecommendationSelect(recommendation, value);
+                  console.log(getItemSelectionStatus(recommendation));
+                }}
                 title={recommendation.elementUsabilityRecommendation ?? ""}
                 index={index}
                 example={recommendation.example ?? ""}

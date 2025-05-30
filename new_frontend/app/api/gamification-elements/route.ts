@@ -25,14 +25,14 @@ export async function POST(request: NextRequest) {
   if (noFilters) {
     //   SELECT DISTINCT gamificationElement FROM suitable_gamification_elements
     const allNames = await prisma.suitableGamificationElements.findMany({
-      select: { gamificationElement: true },
+      select: { gamificationElement: true, id: true },
       distinct: ["gamificationElement"],
     });
 
     return NextResponse.json({
       suitable: [],
       notSuitable: [],
-      other: allNames.map((o) => o.gamificationElement),
+      other: allNames,
     });
   }
 
@@ -53,36 +53,39 @@ export async function POST(request: NextRequest) {
   const [suitableRows, notRows, allNamesRows] = await Promise.all([
     prisma.suitableGamificationElements.findMany({
       where,
+      select: { gamificationElement: true, id: true },
       distinct: ["gamificationElement"],
     }),
     prisma.notSuitableGamificationElements.findMany({
       where,
-      select: { notSuitableGamificationElement: true },
+      select: { notSuitableGamificationElement: true, id: true },
       distinct: ["notSuitableGamificationElement"],
     }),
     prisma.suitableGamificationElements.findMany({
-      select: { gamificationElement: true },
+      select: { gamificationElement: true, id: true },
       distinct: ["gamificationElement"],
     }),
   ]);
+
   const notNamesSet = new Set(
     notRows.map((r) => r.notSuitableGamificationElement)
   );
 
-  const notSuitable = [...notNamesSet];
+  const suitable = suitableRows.filter(
+    (r) => !notNamesSet.has(r.gamificationElement)
+  );
 
-  const suitable = suitableRows
-    .filter((r) => !notNamesSet.has(r.gamificationElement))
-    .map((r) => r.gamificationElement);
-
-  const suitableNames = new Set(suitable.map((r) => r));
-  const allNames = allNamesRows.map((r) => r.gamificationElement);
-
-  const other = allNames.filter(
-    (n) => !suitableNames.has(n) && !notNamesSet.has(n)
+  const notSuitable = notRows.map((r) => ({
+    id: r.id,
+    gamificationElement: r.notSuitableGamificationElement,
+  }));
+  const suitableNames = new Set(suitable.map((r) => r.gamificationElement));
+  const other = allNamesRows.filter(
+    (r) =>
+      !suitableNames.has(r.gamificationElement) &&
+      !notNamesSet.has(r.gamificationElement)
   );
   //  console.log("suitable", suitable);
-  console.log("notSuitable", notSuitable);
   //console.log("other", other);
-  return NextResponse.json({ suitable, notSuitable: notSuitable, other });
+  return NextResponse.json({ suitable, notSuitable, other });
 }

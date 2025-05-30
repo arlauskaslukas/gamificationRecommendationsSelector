@@ -1,20 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, SetStateAction, Dispatch } from "react";
 import Button from "../Button/Button";
 import Pagination from "../Pagination/Pagination";
 import RecommendationItemCard from "../RecommendationItemCard/RecommendationItemCard";
-import { Criteria } from "@/app/types/types";
+import { Criteria, RecommendationSavedType } from "@/app/types/types";
+import { RecommendationStatus } from "@prisma/client";
 
 interface Props {
   criteria: Criteria;
+  generalisedRecommendationsHandler: (
+    recommendations: RecommendationSavedType[]
+  ) => void;
+  selectedGeneralisedRecommendations: RecommendationSavedType[];
+  recommendations: any[];
+  setRecommendations: Dispatch<SetStateAction<any[]>>;
 }
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export default function GeneralisedRecommendationsSection({ criteria }: Props) {
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+export default function GeneralisedRecommendationsSection({
+  criteria,
+  generalisedRecommendationsHandler,
+  selectedGeneralisedRecommendations,
+  recommendations,
+  setRecommendations,
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+
+  const handleRecommendationStatus = (
+    id: number,
+    status: RecommendationStatus
+  ) => {
+    const updated = selectedGeneralisedRecommendations.map((r) =>
+      r.id == id ? { ...r, status } : r
+    );
+    console.log(status);
+    console.log(selectedGeneralisedRecommendations.find((i) => i.id === id));
+    generalisedRecommendationsHandler(updated);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -29,6 +53,18 @@ export default function GeneralisedRecommendationsSection({ criteria }: Props) {
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
       setRecommendations(data);
+      interface InitialSelectedData {
+        id: number;
+        status: RecommendationStatus | null;
+      }
+
+      let initialSelectedData: InitialSelectedData[] = data.map(
+        (item: { id: number }) => ({
+          id: item.id,
+          status: null,
+        })
+      );
+      generalisedRecommendationsHandler(initialSelectedData);
       setPage(1); // reset to first page on new search
     } catch (err: any) {
       console.error(err);
@@ -69,6 +105,7 @@ export default function GeneralisedRecommendationsSection({ criteria }: Props) {
       <div className="pt-10 flex flex-col gap-4">
         {current.map((item, idx) => (
           <RecommendationItemCard
+            id={item.id}
             key={`${item.ruleIdx}`}
             title={item.genRecommendation}
             index={item.ruleIdx}
@@ -79,6 +116,11 @@ export default function GeneralisedRecommendationsSection({ criteria }: Props) {
             usabilityGoal={item.usabilityGoal}
             gamificationGoal={item.gamificationGoal}
             example={item.example}
+            status={
+              selectedGeneralisedRecommendations.find((i) => i.id === item.id)
+                ?.status
+            }
+            onClick={handleRecommendationStatus}
           />
         ))}
       </div>

@@ -9,6 +9,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum RecommendationStatus {
+  NON_FIT
+  PARTIAL_FIT
+  FIT
+}
+
 model GeneralisedRecommendations {
   id                Int     @id @default(autoincrement())
   ruleIdx           Int     @map("rule_idx")
@@ -22,6 +28,16 @@ model GeneralisedRecommendations {
   example           String? @map("example")
 
   @@map("generalised_recommendations")
+  SavedGeneralisedRecommendation SavedGeneralisedRecommendation[]
+}
+
+model SavedGeneralisedRecommendation {
+  generalisedRecommendation GeneralisedRecommendations @relation(fields: [generalisedRecommendationId], references: [id])
+  generalisedRecommendationId Int
+  savedResultId            Int
+  selectionStatus           RecommendationStatus?
+  savedResult              SavedResult @relation(fields: [savedResultId], references: [id])
+  @@id([generalisedRecommendationId, savedResultId])
 }
 
 model SuitableGamificationElements {
@@ -37,6 +53,16 @@ model SuitableGamificationElements {
   usabilityRecommendation String? @map("usabilityRecommendation")
 
   @@map("suitable_gamification_elements")
+  SavedSuitableGamificationElements SavedSuitableGamificationElements[]
+}
+
+model SavedSuitableGamificationElements {
+  suitableGamificationElements SuitableGamificationElements @relation(fields: [suitableGamificationElementsId], references: [id])
+  suitableGamificationElementsId Int
+  savedResultId               Int
+  selected                    Boolean @default(false)
+  savedResult                 SavedResult @relation(fields: [savedResultId], references: [id])
+  @@id([suitableGamificationElementsId, savedResultId])
 }
 
 model UsabilityCharacteristics {
@@ -49,6 +75,15 @@ model UsabilityCharacteristics {
   usabilityCharacteristic String? @map("usabilityCharacteristic")
 
   @@map("usability_characteristics")
+  SavedUsabilityCharacteristics SavedUsabilityCharacteristics[]
+}
+
+model SavedUsabilityCharacteristics {
+  usabilityCharacteristics UsabilityCharacteristics @relation(fields: [usabilityCharacteristicsId], references: [id])
+  usabilityCharacteristicsId Int
+  savedResultId             Int
+  savedResult               SavedResult @relation(fields: [savedResultId], references: [id])
+  @@id([usabilityCharacteristicsId, savedResultId])
 }
 
 model UsabilityRecommendationsForGamificationElementsIso {
@@ -60,6 +95,16 @@ model UsabilityRecommendationsForGamificationElementsIso {
   example                    String? @map("example")
 
   @@map("usability_recommendations_for_gamification_elements_iso_")
+  SavedUsabilityRecommendationsForGamificationElementsIso SavedUsabilityRecommendationsForGamificationElementsIso[]
+}
+
+model SavedUsabilityRecommendationsForGamificationElementsIso {
+  usabilityRecommendationsForGamificationElementsIso UsabilityRecommendationsForGamificationElementsIso @relation(fields: [usabilityRecommendationsForGamificationElementsIsoId], references: [id])
+  usabilityRecommendationsForGamificationElementsIsoId Int
+  selectionStatus           RecommendationStatus?
+  savedResultId             Int
+  savedResult               SavedResult @relation(fields: [savedResultId], references: [id])
+  @@id([usabilityRecommendationsForGamificationElementsIsoId, savedResultId])
 }
 
 model NotSuitableGamificationElements {
@@ -74,6 +119,16 @@ model NotSuitableGamificationElements {
   notSuitableGamificationElement String? @map("notSuitableGamificationElement")
 
   @@map("not_suitable_gamification_elements")
+  SavedNotSuitableGamificationElements SavedNotSuitableGamificationElements[]
+}
+
+model SavedNotSuitableGamificationElements {
+  notSuitableGamificationElements NotSuitableGamificationElements @relation(fields: [notSuitableGamificationElementsId], references: [id])
+  notSuitableGamificationElementsId Int
+  savedResultId                  Int
+  selected                    Boolean @default(false)
+  savedResult                    SavedResult @relation(fields: [savedResultId], references: [id])
+  @@id([notSuitableGamificationElementsId, savedResultId])
 }
 
 model UsabilityRecommendationsForGamificationElementsWcag22 {
@@ -86,4 +141,32 @@ model UsabilityRecommendationsForGamificationElementsWcag22 {
   example                    String? @map("example")
 
   @@map("usability_recommendations_for_gamification_elements_wcag_2_2_")
+  SavedUsabilityRecommendationsForGamificationElementsWcag22 SavedUsabilityRecommendationsForGamificationElementsWcag22[]
+}
+
+model SavedUsabilityRecommendationsForGamificationElementsWcag22 {
+  usabilityRecommendationsForGamificationElementsWcag22 UsabilityRecommendationsForGamificationElementsWcag22 @relation(fields: [usabilityRecommendationsForGamificationElementsWcag22Id], references: [id], map: "FK_UsabilityRecForGamificationWcag22")
+  usabilityRecommendationsForGamificationElementsWcag22Id Int
+  savedResultId             Int
+  selectionStatus           RecommendationStatus?
+  savedResult               SavedResult @relation(fields: [savedResultId], references: [id])
+  @@id([usabilityRecommendationsForGamificationElementsWcag22Id, savedResultId])
+}
+
+model SavedResult {
+  id               Int     @id @default(autoincrement())
+  name             String
+  createdAt        DateTime @default(now())
+
+  SavedGeneralisedRecommendation SavedGeneralisedRecommendation[]
+
+  SavedSuitableGamificationElements SavedSuitableGamificationElements[]
+
+  SavedUsabilityCharacteristics SavedUsabilityCharacteristics[]
+
+  SavedUsabilityRecommendationsForGamificationElementsIso SavedUsabilityRecommendationsForGamificationElementsIso[]
+
+  SavedNotSuitableGamificationElements SavedNotSuitableGamificationElements[]
+
+  SavedUsabilityRecommendationsForGamificationElementsWcag22 SavedUsabilityRecommendationsForGamificationElementsWcag22[]
 }

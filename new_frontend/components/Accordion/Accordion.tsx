@@ -14,12 +14,16 @@ export default function AccordionItem({ title, children }: AccordionItemProps) {
     <div className="pb-2 border-b border-black">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex cursor-pointer justify-between items-center p-4 bg-transparent text-left text-md font-semibold text-blue-600"
+        className="w-full flex gap-4 cursor-pointer justify-between items-center p-4 bg-transparent text-left text-md font-semibold text-blue-600"
       >
         {title}
         <span>{isOpen ? "−" : "+"}</span>
       </button>
-      {isOpen && <div className="p-4 text-sm text-gray-700">{children}</div>}
+      {isOpen && (
+        <div className="p-4 text-sm flex flex-col gap-4 text-gray-700">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

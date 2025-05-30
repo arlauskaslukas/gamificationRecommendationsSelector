@@ -102,8 +102,8 @@ export default function InputForm({ criteria, onChange }: Props) {
     },
     { label: "Cognitive disorder", value: "cognitive disorder" },
     { label: "Alzheimer", value: "alzheimer" },
-    { label: "Visual impairment", value: "visual impairment" },
-    { label: "Hearing impairment", value: "hearing impairment" },
+    { label: "Visual impairment", value: "Visual impairment" },
+    { label: "Hearing impairment", value: "Hearing impairment" },
   ];
 
   const heuristics = [
