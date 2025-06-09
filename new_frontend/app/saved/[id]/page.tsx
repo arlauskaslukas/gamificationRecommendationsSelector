@@ -19,6 +19,7 @@ export default function SavedResultPage() {
   const { id } = useParams();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [metrics, setmetrics] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -102,6 +103,39 @@ export default function SavedResultPage() {
     });
   };
 
+  const getDataForTable = () => {
+    let genTotal = data.SavedGeneralisedRecommendation.length;
+    let genNonFit = data.SavedGeneralisedRecommendation.filter(
+      (rec: SavedGeneralisedRecommendation) =>
+        rec.selectionStatus === RecommendationStatus.NON_FIT
+    ).length;
+    let genPartialFit = data.SavedGeneralisedRecommendation.filter(
+      (rec: SavedGeneralisedRecommendation) =>
+        rec.selectionStatus === RecommendationStatus.PARTIAL_FIT
+    ).length;
+    let genFit = data.SavedGeneralisedRecommendation.filter(
+      (rec: SavedGeneralisedRecommendation) =>
+        rec.selectionStatus === RecommendationStatus.FIT
+    ).length;
+    let genMetScore = genFit + genPartialFit * 0.5;
+    let genPercentage = (genMetScore / genTotal) * 100;
+    return {
+      genTotal,
+      genNonFit,
+      genPartialFit,
+      genFit,
+      genMetScore,
+      genPercentage,
+    };
+  };
+
+  useEffect(() => {
+    if (!loading) {
+      let tabledata = getDataForTable();
+      setmetrics(tabledata);
+    }
+  }, [data, loading]);
+
   const getGeneralisedRecommendationsQuantities = () => {
     let nonFit = data.SavedGeneralisedRecommendation.filter(
       (rec: SavedGeneralisedRecommendation) =>
@@ -135,40 +169,54 @@ export default function SavedResultPage() {
   };
 
   const getIsoRecommendationsQuantities = () => {
-    let nonFit =
-      data.SavedUsabilityRecommendationsForGamificationElementsIso.filter(
-        (rec: SavedUsabilityRecommendationsForGamificationElementsIso) =>
-          rec.selectionStatus === RecommendationStatus.NON_FIT
-      ).length;
-    let partialFit =
-      data.SavedUsabilityRecommendationsForGamificationElementsIso.filter(
-        (rec: SavedUsabilityRecommendationsForGamificationElementsIso) =>
-          rec.selectionStatus === RecommendationStatus.PARTIAL_FIT
-      ).length;
-    let fit =
-      data.SavedUsabilityRecommendationsForGamificationElementsIso.filter(
-        (rec: SavedUsabilityRecommendationsForGamificationElementsIso) =>
-          rec.selectionStatus === RecommendationStatus.FIT
-      ).length;
+    let fit = 0;
+    let partialFit = 0;
+    let nonFit = 0;
+
+    (
+      data.SavedUsabilityRecommendationsForGamificationElementsIso || []
+    ).forEach((group: { recommendations: any[] }) => {
+      group.recommendations.forEach((rec) => {
+        switch (rec.selectionStatus) {
+          case "FIT":
+            fit++;
+            break;
+          case "PARTIAL_FIT":
+            partialFit++;
+            break;
+          case "NON_FIT":
+            nonFit++;
+            break;
+        }
+      });
+    });
+
     return `(Fit - ${fit}, Partial Fit - ${partialFit}, Non fit - ${nonFit}).`;
   };
 
   const getWcagRecommendationsQuantities = () => {
-    let nonFit =
-      data.SavedUsabilityRecommendationsForGamificationElementsWcag22.filter(
-        (rec: SavedUsabilityRecommendationsForGamificationElementsWcag22) =>
-          rec.selectionStatus === RecommendationStatus.NON_FIT
-      ).length;
-    let partialFit =
-      data.SavedUsabilityRecommendationsForGamificationElementsWcag22.filter(
-        (rec: SavedUsabilityRecommendationsForGamificationElementsWcag22) =>
-          rec.selectionStatus === RecommendationStatus.PARTIAL_FIT
-      ).length;
-    let fit =
-      data.SavedUsabilityRecommendationsForGamificationElementsWcag22.filter(
-        (rec: SavedUsabilityRecommendationsForGamificationElementsWcag22) =>
-          rec.selectionStatus === RecommendationStatus.FIT
-      ).length;
+    let fit = 0;
+    let partialFit = 0;
+    let nonFit = 0;
+
+    (
+      data.SavedUsabilityRecommendationsForGamificationElementsWcag22 || []
+    ).forEach((group: { recommendations: any[] }) => {
+      group.recommendations.forEach((rec) => {
+        switch (rec.selectionStatus) {
+          case "FIT":
+            fit++;
+            break;
+          case "PARTIAL_FIT":
+            partialFit++;
+            break;
+          case "NON_FIT":
+            nonFit++;
+            break;
+        }
+      });
+    });
+
     return `(Fit - ${fit}, Partial Fit - ${partialFit}, Non fit - ${nonFit}).`;
   };
 
@@ -266,6 +314,9 @@ export default function SavedResultPage() {
                       !element.selected
                     );
                   }}
+                  updated={
+                    new Date(element.updatedAt) > new Date(element.createdAt)
+                  }
                 />
               )
             )}
@@ -307,84 +358,138 @@ export default function SavedResultPage() {
           {`Usability Recommendations (ISO) ${getIsoRecommendationsQuantities()}`}
         </h2>
         <div className="flex flex-col gap-4">
-          <AccordionItem title="Usability Recommendations (ISO)">
-            {data.SavedUsabilityRecommendationsForGamificationElementsIso.map(
-              (item: any) => (
-                <RecommendationElementCard
-                  key={
-                    item.usabilityRecommendationsForGamificationElementsIso.id
-                  }
-                  status={item.selectionStatus}
-                  onClick={(value: RecommendationStatus) => {
-                    handleIsoRecommendationChange(
-                      item.usabilityRecommendationsForGamificationElementsIsoId,
-                      value
-                    );
-                  }}
-                  title={
-                    item.usabilityRecommendationsForGamificationElementsIso
-                      .elementUsabilityRecommendation ?? ""
-                  }
-                  index={
-                    item.usabilityRecommendationsForGamificationElementsIso
-                      .ruleIdx
-                  }
-                  example={
-                    item.usabilityRecommendationsForGamificationElementsIso
-                      .example ?? ""
-                  }
-                  recommendationName={
-                    item.usabilityRecommendationsForGamificationElementsIso
-                      .isoRecommendation
-                  }
-                />
-              )
-            )}
-          </AccordionItem>
+          {data.SavedUsabilityRecommendationsForGamificationElementsIso.map(
+            (item: any, idx: any) => {
+              if (item.recommendations.length > 0)
+                return (
+                  <AccordionItem key={idx} title={item.element}>
+                    <div className="py-1 flex flex-row">
+                      <p className="font-bold">
+                        Usability recommendation:&nbsp;
+                      </p>
+                      <p>{item.usabilityRecommendation}</p>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      {item.recommendations.map((itemRec: any) => (
+                        <RecommendationElementCard
+                          key={itemRec.id}
+                          title={itemRec.elementUsabilityRecommendation}
+                          example={itemRec.example}
+                          recommendationName={itemRec.recommendation}
+                          index={itemRec.id}
+                          onClick={(value: RecommendationStatus) => {
+                            handleIsoRecommendationChange(itemRec.id, value);
+                          }}
+                          status={itemRec.selectionStatus}
+                        />
+                      ))}
+                    </div>
+                  </AccordionItem>
+                );
+              else return null;
+            }
+          )}
+        </div>
+      </div>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-black">
+          {`Usability Recommendations (WCAG) ${getWcagRecommendationsQuantities()}`}
+        </h2>
+        <div className="flex flex-col gap-4">
+          {data.SavedUsabilityRecommendationsForGamificationElementsWcag22.map(
+            (item: any, idx: any) => {
+              if (item.recommendations.length > 0)
+                return (
+                  <AccordionItem key={idx} title={item.element}>
+                    <div className="py-1 flex flex-row">
+                      <p className="font-bold">
+                        Usability recommendation:&nbsp;
+                      </p>
+                      <p>{item.usabilityRecommendation}</p>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      {item.recommendations.map((itemRec: any) => (
+                        <RecommendationElementCard
+                          key={itemRec.id}
+                          title={itemRec.elementUsabilityRecommendation}
+                          example={itemRec.example}
+                          recommendationName={itemRec.recommendation}
+                          index={itemRec.id}
+                          onClick={(value: RecommendationStatus) => {
+                            handleWcagRecommendationChange(itemRec.id, value);
+                          }}
+                          status={itemRec.selectionStatus}
+                        />
+                      ))}
+                    </div>
+                  </AccordionItem>
+                );
+              else return null;
+            }
+          )}
         </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold text-black">
-          {`Usability Recommendations (WCAG 2.2) ${getWcagRecommendationsQuantities()}`}
-        </h2>
-        <div className="flex flex-col gap-4">
-          <AccordionItem title="Usability Recommendations (WCAG 2.2)">
-            {data.SavedUsabilityRecommendationsForGamificationElementsWcag22.map(
-              (item: any) => (
-                <RecommendationElementCard
-                  key={
-                    item.usabilityRecommendationsForGamificationElementsWcag22
-                      .id
-                  }
-                  status={item.selectionStatus}
-                  onClick={(value: RecommendationStatus) => {
-                    handleWcagRecommendationChange(
-                      item.usabilityRecommendationsForGamificationElementsIsoId,
-                      value
-                    );
-                  }}
-                  title={
-                    item.usabilityRecommendationsForGamificationElementsWcag22
-                      .elementUsabilityRecommendation ?? ""
-                  }
-                  index={
-                    item.usabilityRecommendationsForGamificationElementsWcag22
-                      .ruleIdx
-                  }
-                  example={
-                    item.usabilityRecommendationsForGamificationElementsWcag22
-                      .example ?? ""
-                  }
-                  recommendationName={
-                    item.usabilityRecommendationsForGamificationElementsWcag22
-                      .wcagRecommendation
-                  }
-                />
-              )
-            )}
-          </AccordionItem>
-        </div>
+      <div className="py-3">
+        <h2 className="text-xl font-semibold text-black">{`Metrics`}</h2>
+        <table className="min-w-full table-auto border border-gray-300 text-left text-sm text-gray-800">
+          <thead className="bg-gray-100 font-semibold text-gray-900">
+            <tr>
+              <th className="border-b border-gray-300 px-4 py-3">
+                Calculation Element
+              </th>
+              <th className="border-b border-gray-300 px-4 py-3">Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="even:bg-gray-50 hover:bg-gray-100 transition-colors">
+              <td className="border-b border-gray-200 px-4 py-2">
+                Total number of general recommendations provided
+              </td>
+              <td className="border-b border-gray-200 px-4 py-2">
+                {metrics.genTotal}
+              </td>
+            </tr>
+            <tr className="even:bg-gray-50 hover:bg-gray-100 transition-colors">
+              <td className="border-b border-gray-200 px-4 py-2">Fully met</td>
+              <td className="border-b border-gray-200 px-4 py-2">
+                {metrics.genFit}
+              </td>
+            </tr>
+            <tr className="even:bg-gray-50 hover:bg-gray-100 transition-colors">
+              <td className="border-b border-gray-200 px-4 py-2">
+                Partially met
+              </td>
+              <td className="border-b border-gray-200 px-4 py-2">
+                {metrics.genPartialFit}
+              </td>
+            </tr>
+            <tr className="even:bg-gray-50 hover:bg-gray-100 transition-colors">
+              <td className="border-b border-gray-200 px-4 py-2">
+                Not met at all
+              </td>
+              <td className="border-b border-gray-200 px-4 py-2">
+                {metrics.genNonFit}
+              </td>
+            </tr>
+            <tr className="even:bg-gray-50 hover:bg-gray-100 transition-colors">
+              <td className="border-b border-gray-200 px-4 py-2 font-medium">
+                Total met
+              </td>
+              <td className="border-b border-gray-200 px-4 py-2 font-medium">
+                {metrics.genMetScore}
+              </td>
+            </tr>
+            <tr className="even:bg-gray-50 hover:bg-gray-100 transition-colors">
+              <td className="border-b border-gray-200 px-4 py-2 font-semibold">
+                Percentage met
+              </td>
+              <td className="border-b border-gray-200 px-4 py-2 font-semibold">
+                {metrics.genPercentage}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

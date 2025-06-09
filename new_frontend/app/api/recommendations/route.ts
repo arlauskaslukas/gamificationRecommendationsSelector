@@ -99,6 +99,28 @@ export async function POST(req: NextRequest) {
 
   const groupedMap = new Map<string, RecRow[]>();
 
+  const suitableUsabilityRecs =
+    await prisma.suitableGamificationElements.findMany({
+      where: {
+        gamificationElement: { in: elements },
+      },
+      select: {
+        gamificationElement: true,
+        usabilityRecommendation: true,
+      },
+    });
+
+  const elementsUsability = new Map<string, string>();
+
+  suitableUsabilityRecs.forEach((rec) => {
+    if (!elementsUsability.has(rec.gamificationElement!)) {
+      elementsUsability.set(
+        rec.gamificationElement!,
+        rec.usabilityRecommendation ?? ""
+      );
+    }
+  });
+
   normalised.forEach((rec) => {
     const key = rec.gamificationElement;
     if (!groupedMap.has(key)) groupedMap.set(key, []);
@@ -114,6 +136,7 @@ export async function POST(req: NextRequest) {
   /* ---------- 4. Convert to desired shape ------------------------ */
   const result = Array.from(groupedMap, ([element, recommendations]) => ({
     element,
+    usabilityRecommendation: elementsUsability.get(element) ?? "",
     recommendations,
   }));
 

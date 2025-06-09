@@ -249,6 +249,10 @@ export default function RecommendationsForElementsSection({
       <div className="flex flex-col gap-4">
         {recommendations.map((rec, index) => (
           <AccordionItem key={index} title={rec.element}>
+            <div className="py-3 flex flex-row">
+              <p className="font-bold">Usability recommendation:&nbsp;</p>
+              <p>{rec.usabilityRecommendation}</p>
+            </div>
             {rec.recommendations.map((recommendation, index) => (
               <RecommendationElementCard
                 key={index}

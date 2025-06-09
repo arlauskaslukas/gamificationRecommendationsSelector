@@ -54,9 +54,19 @@ export interface RecRow {
   example: string | null;
 }
 
+export interface RecRowOut {
+  id: number; // unique ID for the row
+  disorder: string; // '-' for ISO rows
+  recommendation: string; // renamed WCAG/ISO text
+  elementUsabilityRecommendation: string | null;
+  example: string | null;
+  selectionStatus: RecommendationStatus;
+}
+
 /** Block returned per gamification element */
 export interface ElementBlock {
   element: string; // the element’s name
+  usabilityRecommendation: string;
   recommendations: RecRow[];
 }
 

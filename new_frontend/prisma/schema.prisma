@@ -62,6 +62,8 @@ model SavedSuitableGamificationElements {
   savedResultId               Int
   selected                    Boolean @default(false)
   savedResult                 SavedResult @relation(fields: [savedResultId], references: [id])
+  updatedAt                   DateTime @updatedAt @default(now())
+  createdAt                   DateTime @default(now())
   @@id([suitableGamificationElementsId, savedResultId])
 }
 
@@ -128,6 +130,8 @@ model SavedNotSuitableGamificationElements {
   savedResultId                  Int
   selected                    Boolean @default(false)
   savedResult                    SavedResult @relation(fields: [savedResultId], references: [id])
+  updatedAt                   DateTime @updatedAt @default(now())
+  createdAt                   DateTime @default(now())
   @@id([notSuitableGamificationElementsId, savedResultId])
 }
 
