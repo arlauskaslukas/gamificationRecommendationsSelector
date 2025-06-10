@@ -12,70 +12,95 @@ interface Props {
 
 export default function InputForm({ criteria, onChange }: Props) {
   const gamificationGoals = [
-    { label: "Increase autonomy", value: "Increase autonomy" },
-    { label: "Reduce stress", value: "Reduce stress" },
+    {
+      label: "Support different learning needs",
+      value: "Support different learning needs",
+    },
+    { label: "Improve focus", value: "Improve focus" },
     {
       label: "Promote intrinsic motivation",
       value: "Promote intrinsic motivation",
     },
+    { label: "Increase autonomy", value: "Increase autonomy" },
+    { label: "To foster competition", value: "To foster competition" },
     { label: "Reinforce learning", value: "Reinforce learning" },
+    { label: "Decrease distraction", value: "Decrease distraction" },
+    { label: "Reduce stress", value: "Reduce stress" },
     {
       label: "Increase engagement and motivation",
       value: "Increase engagement and motivation",
     },
     {
-      label: "Support different learning needs",
-      value: "Support different learning needs",
+      label: "To establish an emotional attachment",
+      value: "To establish an emotional attachment",
     },
-    { label: "Decrease distraction", value: "Decrease distraction" },
-    { label: "Improve focus", value: "Improve focus" },
-    { label: "Foster advancement", value: "Foster advancement" },
-    { label: "To foster competition", value: "To foster competition" },
-  ];
-
-  const usabilityGoals = [
     {
       label: "Support user autonomy and control",
       value: "Support user autonomy and control",
     },
     {
-      label: "Promote voluntary engagement",
-      value: "Promote voluntary engagement",
+      label: "Reduce competition pressure",
+      value: "Reduce competition pressure",
     },
     {
-      label: "Support learning through feedback",
-      value: "Support learning through feedback",
+      label: "Promote extrinsic motivation",
+      value: "Promote extrinsic motivation",
     },
+    { label: "To build habit", value: "To build habit" },
+    { label: "Promote relationships", value: "Promote relationships" },
+    { label: "Keep interest", value: "Keep interest" },
+    { label: "Foster advancement", value: "Foster advancement" },
     {
-      label: "Encourage through positive messaging",
-      value: "Encourage through positive messaging",
+      label: "To build a connection between efforts",
+      value: "To build a connection between efforts",
     },
-    { label: "Enhance accessibility", value: "Enhance accessibility" },
+  ];
+
+  const usabilityGoals = [
+    {
+      label: "Ensure access to help when needed",
+      value: "Ensure access to help when needed",
+    },
     { label: "Reduce memory load", value: "Reduce memory load" },
     {
-      label: "Minimize extraneous cognitive load",
-      value: "Minimize extraneous cognitive load",
+      label: "Ensure good text readability",
+      value: "Ensure good text readability",
+    },
+    { label: "Reduce user frustration", value: "Reduce user frustration" },
+    { label: "Enhance accessibility", value: "Enhance accessibility" },
+    {
+      label: "Promote voluntary engagement",
+      value: "Promote voluntary engagement",
     },
     {
       label: "Ensure aesthetic clarity and simplicity",
       value: "Ensure aesthetic clarity and simplicity",
     },
     {
-      label: "Ensure good text readability",
-      value: "Ensure good text readability",
+      label: "Encourage through positive messaging",
+      value: "Encourage through positive messaging",
+    },
+    { label: "Build trust and comfort", value: "Build trust and comfort" },
+    {
+      label: "Support learning through feedback",
+      value: "Support learning through feedback",
+    },
+    {
+      label: "Minimize extraneous cognitive load",
+      value: "Minimize extraneous cognitive load",
     },
     { label: "Improve recognition", value: "Improve recognition" },
-    {
-      label: "Ensure access to help when needed",
-      value: "Ensure access to help when needed",
-    },
     {
       label: "Focus attention on key elements",
       value: "Focus attention on key elements",
     },
-    { label: "Reduce user frustration", value: "Reduce user frustration" },
-    { label: "Build trust and comfort", value: "Build trust and comfort" },
+    {
+      label: "Support user autonomy and control",
+      value: "Support user autonomy and control",
+    },
+    { label: "Minimize fatigue", value: "Minimize fatigue" },
   ];
+
   const ageGroups = [
     { label: "Adults", value: "adults" },
     { label: "Elderly", value: "elderly" },
@@ -83,27 +108,35 @@ export default function InputForm({ criteria, onChange }: Props) {
     { label: "Teenagers", value: "teenagers" },
   ];
   const domains = [
-    { label: "Driving", value: "driving" },
-    { label: "Medicine (health)", value: "Medicine (health)" },
-    { label: "Education", value: "education" },
-    { label: "Healthy eating", value: "healthy eating" },
-    { label: "Fit", value: "fit" },
+    { label: "medicine (mental health)", value: "medicine (mental health)" },
+    { label: "medicine (healthcare)", value: "medicine (healthcare)" },
+    { label: "driving", value: "driving" },
+    { label: "education", value: "education" },
+    { label: "healthy eating", value: "healthy eating" },
+    { label: "business", value: "business" },
+    { label: "sport (fitness)", value: "sport (fitness)" },
+    { label: "sport (cyclotourism)", value: "sport (cyclotourism)" },
+    { label: "medicine (healthy living)", value: "medicine (healthy living)" },
+    { label: "medicine (rehabilitation)", value: "medicine (rehabilitation)" },
   ];
+
   const disorders = [
-    { label: "Learning difficulties", value: "learning difficulties" },
     {
-      label: "Deficits in forking memory",
-      value: "deficits in forking memory",
+      label: "Deficits in working memory",
+      value: "Deficits in working memory",
     },
-    { label: "Stroke patients", value: "stroke patients" },
     {
       label: "Impairments in motor skills",
-      value: "impairments in motor skills",
+      value: "Impairments in motor skills",
     },
-    { label: "Cognitive disorder", value: "cognitive disorder" },
-    { label: "Alzheimer", value: "alzheimer" },
-    { label: "Visual impairment", value: "Visual impairment" },
+    { label: "Learning difficulties", value: "Learning difficulties" },
+    { label: "Stroke patients", value: "Stroke patients" },
+    { label: "Cognitive disorder", value: "Cognitive disorder" },
+    { label: "Attention disorder", value: "Attention disorder" },
     { label: "Hearing impairment", value: "Hearing impairment" },
+    { label: "Visual impairment", value: "Visual impairment" },
+    { label: "Alzheimer patients", value: "Alzheimer patients" },
+    { label: "Anxiety", value: "Anxiety" },
   ];
 
   const heuristics = [
