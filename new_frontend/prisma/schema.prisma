@@ -54,6 +54,7 @@ model SuitableGamificationElements {
 
   @@map("suitable_gamification_elements")
   SavedSuitableGamificationElements SavedSuitableGamificationElements[]
+  SavedElementUsabilityRecommendation SavedElementUsabilityRecommendation[]
 }
 
 model SavedSuitableGamificationElements {
@@ -65,6 +66,18 @@ model SavedSuitableGamificationElements {
   updatedAt                   DateTime @updatedAt @default(now())
   createdAt                   DateTime @default(now())
   @@id([suitableGamificationElementsId, savedResultId])
+}
+
+model SavedElementUsabilityRecommendation {
+  id                            Int      @id @default(autoincrement())
+  suitableGamificationElementsId Int
+  savedResultId                Int
+  selectionStatus               RecommendationStatus?
+
+  suitableGamificationElements SuitableGamificationElements @relation(fields: [suitableGamificationElementsId], references: [id])
+  savedResult                  SavedResult @relation(fields: [savedResultId], references: [id])
+
+  @@unique([suitableGamificationElementsId, savedResultId])
 }
 
 model UsabilityCharacteristics {
@@ -173,4 +186,6 @@ model SavedResult {
   SavedNotSuitableGamificationElements SavedNotSuitableGamificationElements[]
 
   SavedUsabilityRecommendationsForGamificationElementsWcag22 SavedUsabilityRecommendationsForGamificationElementsWcag22[]
+
+  SavedElementUsabilityRecommendation SavedElementUsabilityRecommendation[]
 }

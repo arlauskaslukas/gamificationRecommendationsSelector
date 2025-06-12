@@ -7,9 +7,9 @@ export async function POST(request: NextRequest) {
   let body = await request.json();
   body = {
     ...body,
-    ageGroup: body.ageGroup ?? [""],
-    applicationDomain: body.applicationDomain ?? [""],
-    disorder: body.disorder ?? [""],
+    ageGroup: body.ageGroup ?? [],
+    applicationDomain: body.applicationDomain ?? [],
+    disorder: body.disorder ?? [],
     usabilityGoal: body.usabilityGoal ?? [],
     gamificationGoal: body.gamificationGoal ?? [],
     usabilityPrinciple: body.usabilityPrinciple ?? [],
@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
     "usabilityPrinciple",
   ]);
 
-  const data = await prisma.generalisedRecommendations.findMany({ where });
+  const data = await prisma.generalisedRecommendations.findMany({
+    where,
+    orderBy: { ruleIdx: "asc" },
+  });
   const deduplicatedData = deduplicate(data);
   return NextResponse.json(deduplicatedData);
 }

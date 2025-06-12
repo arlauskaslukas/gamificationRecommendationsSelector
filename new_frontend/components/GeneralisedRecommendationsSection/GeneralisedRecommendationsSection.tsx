@@ -4,6 +4,7 @@ import Pagination from "../Pagination/Pagination";
 import RecommendationItemCard from "../RecommendationItemCard/RecommendationItemCard";
 import { Criteria, RecommendationSavedType } from "@/app/types/types";
 import { RecommendationStatus } from "@prisma/client";
+import sanitizeCriteria from "@/app/lib/helpers/sanitizeCriteria";
 
 interface Props {
   criteria: Criteria;
@@ -39,16 +40,20 @@ export default function GeneralisedRecommendationsSection({
     console.log(selectedGeneralisedRecommendations.find((i) => i.id === id));
     generalisedRecommendationsHandler(updated);
   };
+  const NOT_APPLICABLE = "Not applicable";
 
   const fetchData = async () => {
     setLoading(true);
-    console.log("Fetching data with criteria:", criteria);
+
+    const processedCriteria = sanitizeCriteria(criteria);
+
+    console.log("Fetching data with criteria:", processedCriteria);
     setError(null);
     try {
       const res = await fetch("/api/generalised-recommendations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(criteria),
+        body: JSON.stringify(processedCriteria),
       });
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();

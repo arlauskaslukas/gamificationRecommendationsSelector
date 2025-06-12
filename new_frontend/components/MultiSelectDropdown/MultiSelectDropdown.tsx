@@ -23,6 +23,13 @@ export default function MultiSelectDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const NOT_APPLICABLE = "Not applicable";
+  const defaultOptions = [
+    { label: NOT_APPLICABLE, value: NOT_APPLICABLE },
+    ...options,
+  ];
+  const isNotApplicableSelected = selected.includes(NOT_APPLICABLE);
+
   // Close on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -37,11 +44,32 @@ export default function MultiSelectDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Handle selection logic for Not Applicable
   const toggleOption = (value: string) => {
-    if (selected.includes(value)) {
-      onChange(selected.filter((v) => v !== value));
+    if (value === NOT_APPLICABLE) {
+      if (isNotApplicableSelected) {
+        onChange(selected.filter((v) => v !== NOT_APPLICABLE));
+      } else {
+        onChange([NOT_APPLICABLE]);
+      }
     } else {
-      onChange([...selected, value]);
+      if (isNotApplicableSelected) {
+        // If Not Applicable is selected, remove it and add the new value
+        onChange([value]);
+      } else {
+        // Toggle the selected value
+        if (selected.includes(value)) {
+          const newSelected = selected.filter((v) => v !== value);
+          // If no other values are selected, add Not Applicable back
+          if (newSelected.length === 0) {
+            onChange([NOT_APPLICABLE]);
+          } else {
+            onChange(newSelected);
+          }
+        } else {
+          onChange([...selected, value]);
+        }
+      }
     }
   };
 
@@ -57,7 +85,7 @@ export default function MultiSelectDropdown({
             <span className="text-gray-500">{placeholder}</span>
           )}
           {selected.map((value) => {
-            const option = options.find((opt) => opt.value === value);
+            const option = defaultOptions.find((opt) => opt.value === value);
             return (
               <span
                 key={value}
@@ -81,19 +109,34 @@ export default function MultiSelectDropdown({
 
         {isOpen && (
           <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto">
-            {options.map((option) => (
-              <div
-                key={option.value}
-                onClick={() => toggleOption(option.value)}
-                className={`p-2 cursor-pointer hover:bg-blue-400 text-black hover:text-white ${
-                  selected.includes(option.value)
-                    ? "bg-blue-300 font-medium"
-                    : ""
-                }`}
-              >
-                {option.label}
-              </div>
-            ))}
+            <div
+              onClick={() => toggleOption(NOT_APPLICABLE)}
+              className={`p-2 cursor-pointer hover:bg-blue-400 text-black hover:text-white ${
+                selected.includes(NOT_APPLICABLE)
+                  ? "bg-blue-300 font-medium"
+                  : ""
+              }`}
+            >
+              {NOT_APPLICABLE}
+            </div>
+            {options.map((option) => {
+              let isDisabled = isNotApplicableSelected;
+              return (
+                <div
+                  key={option.value}
+                  onClick={() => {
+                    if (!isDisabled) toggleOption(option.value);
+                  }}
+                  className={`p-2 cursor-pointer hover:bg-blue-400 text-black hover:text-white ${
+                    selected.includes(option.value)
+                      ? "bg-blue-300 font-medium"
+                      : ""
+                  } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  {option.label}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -105,20 +105,30 @@ export async function POST(req: NextRequest) {
         gamificationElement: { in: elements },
       },
       select: {
+        id: true,
         gamificationElement: true,
         usabilityRecommendation: true,
       },
     });
 
-  const elementsUsability = new Map<string, string>();
+  type UsabilityRecOut = { id: number; recommendation: string };
+
+  const elementsUsability = new Map<string, UsabilityRecOut[]>();
 
   suitableUsabilityRecs.forEach((rec) => {
-    if (!elementsUsability.has(rec.gamificationElement!)) {
-      elementsUsability.set(
-        rec.gamificationElement!,
-        rec.usabilityRecommendation ?? ""
-      );
+    const key = rec.gamificationElement!;
+    const value = rec.usabilityRecommendation?.trim();
+    const id = rec.id;
+
+    if (!value || value === "-") return;
+
+    const existing = elementsUsability.get(key) ?? [];
+
+    if (!existing.some((r) => r.recommendation === value)) {
+      existing.push({ id, recommendation: value });
     }
+
+    elementsUsability.set(key, existing);
   });
 
   normalised.forEach((rec) => {
@@ -136,7 +146,7 @@ export async function POST(req: NextRequest) {
   /* ---------- 4. Convert to desired shape ------------------------ */
   const result = Array.from(groupedMap, ([element, recommendations]) => ({
     element,
-    usabilityRecommendation: elementsUsability.get(element) ?? "",
+    usabilityRecommendations: elementsUsability.get(element) ?? [],
     recommendations,
   }));
 

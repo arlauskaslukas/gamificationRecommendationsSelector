@@ -14,6 +14,7 @@ import {
   SavedUsabilityRecommendationsForGamificationElementsWcag22,
 } from "@prisma/client";
 import AccordionItem from "@/components/Accordion/Accordion";
+import RuleMetadataInteractiveCard from "@/components/ElementMetadataCard/ElementMetadataCard";
 
 export default function SavedResultPage() {
   const { id } = useParams();
@@ -63,6 +64,21 @@ export default function SavedResultPage() {
     status: RecommendationStatus
   ) => {
     await fetch(`/api/saved-result/${id}/generalised/${gid}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: status,
+      }),
+    }).then((res) => {
+      refetch();
+    });
+  };
+
+  const handleElemRecChange = async (
+    gid: number,
+    status: RecommendationStatus
+  ) => {
+    await fetch(`/api/saved-result/${id}/element-usability/${gid}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -355,6 +371,40 @@ export default function SavedResultPage() {
 
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-black">
+          {`Element usability recommendations`}
+        </h2>
+        <div className="flex flex-col gap-4">
+          {data.RuleMetadataByRuleIdx.map((item: any, idx: any) => {
+            console.log(item.data);
+            return (
+              <AccordionItem title={item.element} key={idx}>
+                <div className="grid grid-cols-2 gap-4">
+                  {item.data.map((entry: any, index: number) => {
+                    return (
+                      <RuleMetadataInteractiveCard
+                        element={item.element}
+                        key={entry.id}
+                        data={entry}
+                        onStatusChange={(
+                          id: number,
+                          status: RecommendationStatus
+                        ) => {
+                          handleElemRecChange(
+                            entry.suitableGamificationElementsId,
+                            status
+                          );
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </AccordionItem>
+            );
+          })}
+        </div>
+      </div>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-black">
           {`Usability Recommendations (ISO) ${getIsoRecommendationsQuantities()}`}
         </h2>
         <div className="flex flex-col gap-4">
@@ -365,9 +415,15 @@ export default function SavedResultPage() {
                   <AccordionItem key={idx} title={item.element}>
                     <div className="py-1 flex flex-row">
                       <p className="font-bold">
-                        Usability recommendation:&nbsp;
+                        Usability recommendations:&nbsp;
                       </p>
-                      <p>{item.usabilityRecommendation}</p>
+                      <ul className="list-disc list-inside text-gray-800">
+                        {item.usabilityRecommendations.map(
+                          (rec: string, idx: number) => (
+                            <li key={idx}>{rec}</li>
+                          )
+                        )}
+                      </ul>
                     </div>
                     <div className="flex flex-col gap-4">
                       {item.recommendations.map((itemRec: any) => (
@@ -405,7 +461,13 @@ export default function SavedResultPage() {
                       <p className="font-bold">
                         Usability recommendation:&nbsp;
                       </p>
-                      <p>{item.usabilityRecommendation}</p>
+                      <ul className="list-disc list-inside text-gray-800">
+                        {item.usabilityRecommendations.map(
+                          (rec: string, idx: number) => (
+                            <li key={idx}>{rec}</li>
+                          )
+                        )}
+                      </ul>
                     </div>
                     <div className="flex flex-col gap-4">
                       {item.recommendations.map((itemRec: any) => (

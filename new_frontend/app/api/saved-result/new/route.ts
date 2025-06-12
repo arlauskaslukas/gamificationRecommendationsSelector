@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 import { RecommendationStatus } from "@prisma/client";
+import { SavedElementUsabilityRecommendation } from "@/app/types/types";
 
 type RecommendationSavedType = {
   id: number;
@@ -19,6 +20,7 @@ type SavedResultType = {
   usabilityRecommendationsForGamificationElementsIso: RecommendationSavedType[];
   notSuitableElements: ElementSelectionStatus[];
   savedUsabilityRecommendationsForGamificationElementsWcag: RecommendationSavedType[];
+  savedElementUsabilityRecommendations: SavedElementUsabilityRecommendation[];
 };
 
 export async function POST(req: NextRequest) {
@@ -29,6 +31,7 @@ export async function POST(req: NextRequest) {
     usabilityRecommendationsForGamificationElementsIso,
     notSuitableElements,
     savedUsabilityRecommendationsForGamificationElementsWcag,
+    savedElementUsabilityRecommendations,
   }: SavedResultType = await req.json();
 
   if (!name || !generalisedRecommendations || !elements) {
@@ -91,6 +94,14 @@ export async function POST(req: NextRequest) {
           ),
         }
       );
+    const savedElementUsabilityRecommendationsResult =
+      await prisma.savedElementUsabilityRecommendation.createMany({
+        data: savedElementUsabilityRecommendations.map((rec) => ({
+          savedResultId: savedResult.id,
+          suitableGamificationElementsId: rec.elementId,
+          selectionStatus: rec.status,
+        })),
+      });
 
     return NextResponse.json(savedResult, { status: 201 });
   } catch (error) {

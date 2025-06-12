@@ -37,7 +37,7 @@ export default function RecommendationItemCard({
     <div key={index} className="w-full bg-white text-black py-2 pb-6 px-4">
       <div className="font-bold text-xl flex flex-row justify-between">
         <h3>
-          #{index + 1} {title}
+          #{index} {title}
         </h3>
       </div>
       <div className="grid grid-cols-2 pt-2">

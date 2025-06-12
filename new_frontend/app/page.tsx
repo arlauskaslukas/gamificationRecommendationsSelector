@@ -3,6 +3,7 @@ import InputForm from "@/components/InputForm/InputForm";
 import OutputSpace from "@/components/OutputSpace/OutputSpace";
 import {
   Criteria,
+  ElementRec,
   ElementsRecResponse,
   ElementsType,
   RecRow,
@@ -11,6 +12,9 @@ import {
 import { useState } from "react";
 import SaveSection from "@/components/SaveSection/SaveSection";
 import { RecommendationStatus } from "@prisma/client";
+import sanitizeCriteria from "./lib/helpers/sanitizeCriteria";
+import { fetchElementRecommendations } from "./lib/api/fetchRecommendationsForElements";
+import fetchElementRecs from "./lib/api/fetchElementRecs";
 
 type RecommendationSavedType = {
   id: number;
@@ -24,14 +28,15 @@ type ElementSelectionStatus = {
 
 export default function Home() {
   const [criteria, setCriteria] = useState<Criteria>({
-    usabilityGoal: [],
-    ageGroup: [],
-    disorder: [],
-    applicationDomain: [],
+    usabilityGoal: ["Not applicable"],
+    ageGroup: ["Not applicable"],
+    disorder: ["Not applicable"],
+    applicationDomain: ["Not applicable"],
     usabilityPrinciple: [],
-    gamificationGoal: [],
+    gamificationGoal: ["Not applicable"],
   });
   const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [elementRec, setElementRec] = useState<ElementRec>([]);
 
   const [elements, setElements] = useState<ElementsType>({
     suitable: [],
@@ -55,6 +60,9 @@ export default function Home() {
     useState<RecommendationSavedType[]>([]);
 
   const [websiteName, setWebsiteName] = useState<string>("");
+  const [elementUsabilityStatuses, setElementUsabilityStatuses] = useState<
+    Record<number, RecommendationStatus | null>
+  >({});
 
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -76,6 +84,40 @@ export default function Home() {
     recommendations: RecommendationSavedType[]
   ) => {
     setGeneralisedRecommendations(recommendations);
+  };
+
+  const handleElementUsabilityStatusChange = (
+    elementId: number,
+    status: RecommendationStatus | null
+  ) => {
+    setElementUsabilityStatuses((prev) => ({
+      ...prev,
+      [elementId]: status,
+    }));
+  };
+
+  const handleUsabilityElementsFetch = async () => {
+    console.log("Fetching usability elements with criteria:", elements.other);
+    const processedCriteria = sanitizeCriteria(criteria);
+    let selEl = elements.other
+      .filter((el) => el.selected)
+      .map((el) => el.element.gamificationElement);
+    selEl.push(
+      ...elements.suitable
+        .filter((el) => el.selected)
+        .map((el) => el.element.gamificationElement)
+    );
+    console.log("Selected elements for usability fetch:", selEl);
+    selEl.push(
+      ...elements.notSuitable
+        .filter((el) => el.selected)
+        .map((el) => el.element.gamificationElement)
+    );
+
+    const data = await fetchElementRecs(
+      { ...processedCriteria, gamificationElement: selEl },
+      setElementRec
+    );
   };
 
   const specificRecommendationsHandler = (
@@ -101,6 +143,13 @@ export default function Home() {
   };
 
   const handleSave = () => {
+    const elementUsabilityStatusArray = Object.entries(
+      elementUsabilityStatuses
+    ).map(([id, status]) => ({
+      elementId: Number(id),
+      status: status,
+    }));
+
     let input: SavedResultType = {
       name: websiteName,
       generalisedRecommendations: generalisedRecommendations,
@@ -110,6 +159,7 @@ export default function Home() {
       notSuitableElements: selectedUnusableElements,
       savedUsabilityRecommendationsForGamificationElementsWcag:
         selectedWCAGRecommendations,
+      savedElementUsabilityRecommendations: elementUsabilityStatusArray,
     };
     console.log("Input to save:", input);
     fetch("/api/saved-result/new", {
@@ -162,6 +212,12 @@ export default function Home() {
           setElements={setElements}
           isoWcagRecommendations={isoWcagRecs}
           setIsoWcagRecommendations={setIsoWcagRecs}
+          elementUsabilityStatuses={elementUsabilityStatuses}
+          handleElementUsabilityStatusChange={
+            handleElementUsabilityStatusChange
+          }
+          handleUsabilityElementsFetch={handleUsabilityElementsFetch}
+          elementRec={elementRec}
         />
       </main>
       <footer className=""></footer>

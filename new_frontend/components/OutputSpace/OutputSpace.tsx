@@ -2,6 +2,7 @@
 
 import {
   Criteria,
+  ElementRec,
   ElementSelectionStatus,
   ElementsRecResponse,
   ElementsType,
@@ -12,6 +13,7 @@ import GeneralisedRecommendationsSection from "../GeneralisedRecommendationsSect
 import RecommendationsForElementsSection from "../RecommendationsForElementsSection/RecommendationsForElementsSection";
 import Tabs from "../Tabs/Tabs";
 import { Dispatch, SetStateAction } from "react";
+import { RecommendationStatus } from "@prisma/client";
 
 interface Props {
   criteria: Criteria;
@@ -35,6 +37,13 @@ interface Props {
   setElements: Dispatch<SetStateAction<ElementsType>>;
   isoWcagRecommendations: ElementsRecResponse;
   setIsoWcagRecommendations: Dispatch<SetStateAction<ElementsRecResponse>>;
+  elementUsabilityStatuses: Record<number, RecommendationStatus | null>;
+  handleElementUsabilityStatusChange: (
+    elementId: number,
+    status: RecommendationStatus | null
+  ) => void;
+  handleUsabilityElementsFetch: () => Promise<void>;
+  elementRec: ElementRec;
 }
 
 export default function OutputSpace({
@@ -54,6 +63,10 @@ export default function OutputSpace({
   setElements,
   isoWcagRecommendations,
   setIsoWcagRecommendations,
+  elementUsabilityStatuses,
+  handleElementUsabilityStatusChange,
+  handleUsabilityElementsFetch,
+  elementRec,
 }: Props) {
   const tabs = [
     {
@@ -88,6 +101,12 @@ export default function OutputSpace({
           setElements={setElements}
           recommendations={isoWcagRecommendations}
           setRecommendations={setIsoWcagRecommendations}
+          elementUsabilityStatuses={elementUsabilityStatuses}
+          handleElementUsabilityStatusChange={
+            handleElementUsabilityStatusChange
+          }
+          handleUsabilityElementsFetch={handleUsabilityElementsFetch}
+          elementRec={elementRec}
         />
       ),
     },

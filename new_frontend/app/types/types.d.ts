@@ -66,12 +66,21 @@ export interface RecRowOut {
 /** Block returned per gamification element */
 export interface ElementBlock {
   element: string; // the element’s name
-  usabilityRecommendation: string;
+  usabilityRecommendations: {
+    id: number;
+    recommendation: string;
+    status: RecommendationStatus | null;
+  }[];
   recommendations: RecRow[];
 }
 
 /** Entire API payload */
 export type ElementsRecResponse = ElementBlock[];
+
+export type SavedElementUsabilityRecommendation = {
+  elementId: number;
+  status: RecommendationStatus;
+};
 
 type SavedResultType = {
   name: string;
@@ -80,6 +89,7 @@ type SavedResultType = {
   usabilityRecommendationsForGamificationElementsIso: RecommendationSavedType[];
   notSuitableElements: ElementSelectionStatus[];
   savedUsabilityRecommendationsForGamificationElementsWcag: RecommendationSavedType[];
+  savedElementUsabilityRecommendations: SavedElementUsabilityRecommendation[];
 };
 
 type RecommendationSavedType = {
@@ -91,3 +101,29 @@ type ElementSelectionStatus = {
   id: number;
   status: boolean;
 };
+
+export type GamificationElementData = {
+  id: number;
+  ruleIdx: number;
+  ageGroup: string;
+  applicationDomain: string;
+  disorder: string;
+  gamificationGoal: string;
+  usabilityGoal: string;
+  usabilityCharacteristic: string | null;
+  gamificationElement: string;
+  usabilityRecommendation: string;
+};
+
+export type GamificationElementEntry = {
+  id: number;
+  selectionStatus: RecommendationStatus | null;
+  data: GamificationElementData;
+};
+
+export type GroupedGamificationElement = {
+  element: string;
+  data: GamificationElementEntry[];
+};
+
+export type ElementRec = GroupedGamificationElement[];

@@ -1,6 +1,7 @@
 "use client";
 import {
   Criteria,
+  ElementRec,
   ElementSelectionStatus,
   ElementsRecResponse,
   ElementsResponse,
@@ -16,6 +17,9 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { fetchGamificationElements } from "@/app/lib/api/fetchGamificationElements";
 import { fetchElementRecommendations } from "@/app/lib/api/fetchRecommendationsForElements";
 import { RecommendationStatus } from "@prisma/client";
+import RecStatusMark from "../RecStatusMark/RecStatusMark";
+import RuleMetadataInteractiveCard from "../ElementMetadataCard/ElementMetadataCard";
+import RuleMetadataInteractiveCardMain from "../ElementMetadataCard/ElementMetadataCardMain";
 
 interface Props {
   criteria: Criteria;
@@ -33,6 +37,13 @@ interface Props {
   setElements: Dispatch<SetStateAction<ElementsType>>;
   recommendations: ElementsRecResponse;
   setRecommendations: Dispatch<SetStateAction<ElementsRecResponse>>;
+  elementUsabilityStatuses: Record<number, RecommendationStatus | null>;
+  handleElementUsabilityStatusChange: (
+    elementId: number,
+    status: RecommendationStatus | null
+  ) => void;
+  handleUsabilityElementsFetch: () => Promise<void>;
+  elementRec: ElementRec;
 }
 
 export default function RecommendationsForElementsSection({
@@ -48,6 +59,10 @@ export default function RecommendationsForElementsSection({
   setElements,
   recommendations,
   setRecommendations,
+  elementUsabilityStatuses,
+  handleElementUsabilityStatusChange,
+  handleUsabilityElementsFetch,
+  elementRec,
 }: Props) {
   const [elementsLoaded, setElementsLoaded] = useState(false);
   const [recommendationsLoaded, setRecommendationsLoaded] = useState(false);
@@ -123,6 +138,8 @@ export default function RecommendationsForElementsSection({
       console.log(res);
       let iso: RecommendationSavedType[] = [];
       let wcag: RecommendationSavedType[] = [];
+      let elementRecomendations: Record<number, RecommendationStatus | null> =
+        {};
       res.forEach((el) => {
         iso = [
           ...iso,
@@ -143,6 +160,11 @@ export default function RecommendationsForElementsSection({
             })),
         ];
       });
+      res.forEach((el) => {
+        el.usabilityRecommendations.forEach((r) => {
+          handleElementUsabilityStatusChange(r.id, null);
+        });
+      });
       selectedSpecificRecommendationsHandler(iso, wcag);
 
       if (res) {
@@ -151,6 +173,11 @@ export default function RecommendationsForElementsSection({
       }
     });
   };
+
+  const handleElementUsabilityFetch = async () => {
+    await handleUsabilityElementsFetch();
+  };
+
   const handleSelect = (listKey: keyof ElementsType, index: number) => {
     setElements((prevElements) => ({
       ...prevElements,
@@ -231,7 +258,7 @@ export default function RecommendationsForElementsSection({
       </div>
       <div className="flex px-2 pt-6 flex-row justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-800">
-          Recommendations for gamification elements{" "}
+          ISO and WCAG recommendations for gamification elements{" "}
           {recommendationsLoaded &&
             `(${
               recommendations
@@ -249,9 +276,35 @@ export default function RecommendationsForElementsSection({
       <div className="flex flex-col gap-4">
         {recommendations.map((rec, index) => (
           <AccordionItem key={index} title={rec.element}>
-            <div className="py-3 flex flex-row">
-              <p className="font-bold">Usability recommendation:&nbsp;</p>
-              <p>{rec.usabilityRecommendation}</p>
+            <div className="py-3">
+              <p className="font-bold mb-1">Usability recommendations:</p>
+              <table className="text-sm w-full">
+                <thead>
+                  <tr>
+                    <th className="text-left">Recommendation</th>
+                    <th className="text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rec.usabilityRecommendations.map((ur) => (
+                    <tr className="border" key={ur.id}>
+                      <td>{ur.recommendation}</td>
+                      <td className="space-x-2">
+                        {Object.values(RecommendationStatus).map((status) => (
+                          <RecStatusMark
+                            key={status}
+                            selected={elementUsabilityStatuses[ur.id] == status}
+                            value={status}
+                            onClick={(value: RecommendationStatus) => {
+                              handleElementUsabilityStatusChange(ur.id, value);
+                            }}
+                          />
+                        ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             {rec.recommendations.map((recommendation, index) => (
               <RecommendationElementCard
@@ -269,6 +322,48 @@ export default function RecommendationsForElementsSection({
             ))}
           </AccordionItem>
         ))}
+      </div>
+      <div className="my-6">
+        <div className="flex flex-row justify-between items-center px-2">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Element usability recommendations{" "}
+            {elementRec && `(${elementRec.length})`}
+          </h2>
+          <Button
+            label="Determine element usability recommendations"
+            onClick={async () => {
+              await handleElementUsabilityFetch();
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {elementRec &&
+            elementRec.map((item, idx: any) => {
+              console.log(item.data);
+              return (
+                <AccordionItem title={item.element} key={idx}>
+                  <div className="grid grid-cols-2 gap-4">
+                    {item?.data.map((entry, index: number) => {
+                      return (
+                        <RuleMetadataInteractiveCardMain
+                          props={entry.data}
+                          selectionStatus={elementUsabilityStatuses[entry.id]}
+                          key={entry.id}
+                          onStatusChange={(
+                            id: number,
+                            status: RecommendationStatus
+                          ) => {
+                            handleElementUsabilityStatusChange(id, status);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                </AccordionItem>
+              );
+            })}
+        </div>
       </div>
     </div>
   );

@@ -174,6 +174,8 @@ export default function InputForm({ criteria, onChange }: Props) {
   const [selectedCharacteristics, setSelectedCharacteristics] = useState<
     string[]
   >([]);
+  const [disableUsabilityPrinciples, setDisableUsabilityPrinciples] =
+    useState(false);
 
   return (
     <div className="w-full border-1 border-black p-6 my-8">
@@ -214,8 +216,23 @@ export default function InputForm({ criteria, onChange }: Props) {
           />
         </div>
         <div className="col-span-2 flex flex-col gap-2">
-          <div className="pb-2 text-black text-sm">
-            Select usability characteristics
+          <div className="pb-2 text-black text-sm flex items-center gap-3">
+            <label htmlFor="disableUsability" className="font-medium">
+              Select usability characteristics
+            </label>
+            <input
+              type="checkbox"
+              id="disableUsability"
+              checked={disableUsabilityPrinciples}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setDisableUsabilityPrinciples(checked);
+                if (checked) {
+                  setField("usabilityPrinciple")([]);
+                }
+              }}
+            />
+            <span className="text-sm text-gray-700">Not applicable</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Checklist
@@ -223,12 +240,14 @@ export default function InputForm({ criteria, onChange }: Props) {
               selected={criteria.usabilityPrinciple}
               onChange={setField("usabilityPrinciple")}
               placeholder="Nielsen heuristics"
+              disabled={disableUsabilityPrinciples}
             />
             <Checklist
               options={ISOprinciples}
               selected={criteria.usabilityPrinciple}
               onChange={setField("usabilityPrinciple")}
               placeholder="ISO 9241-110 principles"
+              disabled={disableUsabilityPrinciples}
             />
           </div>
         </div>

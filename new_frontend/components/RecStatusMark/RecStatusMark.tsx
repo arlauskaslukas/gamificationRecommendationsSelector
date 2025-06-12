@@ -13,9 +13,9 @@ type StatusStyle = {
 };
 
 const labelByStatus: Record<RecommendationStatus, string> = {
-  [RecommendationStatus.FIT]: "Fit",
-  [RecommendationStatus.PARTIAL_FIT]: "Partial fit",
-  [RecommendationStatus.NON_FIT]: "Non fit",
+  [RecommendationStatus.FIT]: "Implemented",
+  [RecommendationStatus.PARTIAL_FIT]: "Partially implemented",
+  [RecommendationStatus.NON_FIT]: "Not implemented",
 };
 
 const styleByStatus: Record<RecommendationStatus, StatusStyle> = {

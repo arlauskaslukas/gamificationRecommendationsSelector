@@ -54,6 +54,14 @@ export async function POST(
             },
           },
         },
+        SavedElementUsabilityRecommendation: {
+          where: {
+            savedResultId: Number(id),
+          },
+          include: {
+            suitableGamificationElements: true,
+          },
+        },
         SavedUsabilityRecommendationsForGamificationElementsWcag22: {
           include: {
             usabilityRecommendationsForGamificationElementsWcag22: true,
@@ -66,10 +74,33 @@ export async function POST(
         },
       },
     });
+    if (!result) {
+      return NextResponse.json({ error: "Result not found" }, { status: 404 });
+    }
+    const ruleMetadataByElement: {
+      element: string;
+      data: typeof result.SavedElementUsabilityRecommendation;
+    }[] = [];
+    const groupingMap: Record<
+      string,
+      typeof result.SavedElementUsabilityRecommendation
+    > = {};
+
+    for (const rec of result.SavedElementUsabilityRecommendation) {
+      const elementName = rec.suitableGamificationElements.gamificationElement!;
+      if (!groupingMap[elementName]) {
+        groupingMap[elementName] = [];
+      }
+      groupingMap[elementName].push(rec);
+    }
+
+    for (const [element, data] of Object.entries(groupingMap)) {
+      ruleMetadataByElement.push({ element, data });
+    }
 
     const groupISORecommendations = new Map<string, RecRowOut[]>();
     const groupWcagRecommendations = new Map<string, RecRowOut[]>();
-    const elementsUsability = new Map<string, string>();
+    const elementsUsability = new Map<string, string[]>();
 
     for (const rec of result?.SavedUsabilityRecommendationsForGamificationElementsIso ||
       []) {
@@ -93,20 +124,30 @@ export async function POST(
         example: rec.usabilityRecommendationsForGamificationElementsIso.example,
         selectionStatus: rec.selectionStatus,
       });
-
-      const elementUsability =
-        await prisma.suitableGamificationElements.findFirst({
-          where: { gamificationElement: element },
-          select: { gamificationElement: true, usabilityRecommendation: true },
-        });
-
-      if (elementUsability) {
-        elementsUsability.set(
-          element,
-          elementUsability.usabilityRecommendation!
-        );
-      }
     }
+
+    const usabilityRecs = await prisma.suitableGamificationElements.findMany({
+      where: {
+        gamificationElement: { in: Array.from(groupISORecommendations.keys()) },
+      },
+      select: {
+        gamificationElement: true,
+        usabilityRecommendation: true,
+      },
+    });
+
+    usabilityRecs.forEach((rec) => {
+      const key = rec.gamificationElement!;
+      const value = rec.usabilityRecommendation?.trim();
+
+      if (!value || value === "-") return;
+
+      if (!elementsUsability.has(key)) {
+        elementsUsability.set(key, [value]);
+      } else if (!elementsUsability.get(key)!.includes(value)) {
+        elementsUsability.get(key)!.push(value);
+      }
+    });
 
     result?.SavedUsabilityRecommendationsForGamificationElementsWcag22.forEach(
       (rec) => {
@@ -156,7 +197,7 @@ export async function POST(
       groupISORecommendations,
       ([element, recommendations]) => ({
         element,
-        usabilityRecommendation: elementsUsability.get(element),
+        usabilityRecommendations: elementsUsability.get(element) ?? [],
         recommendations,
       })
     );
@@ -164,7 +205,7 @@ export async function POST(
       groupWcagRecommendations,
       ([element, recommendations]) => ({
         element,
-        usabilityRecommendation: elementsUsability.get(element),
+        usabilityRecommendations: elementsUsability.get(element) ?? [],
         recommendations,
       })
     );
@@ -179,6 +220,7 @@ export async function POST(
       SavedUsabilityRecommendationsForGamificationElementsIso: returnableIso,
       SavedUsabilityRecommendationsForGamificationElementsWcag22:
         returnableWcag,
+      RuleMetadataByRuleIdx: ruleMetadataByElement,
     };
 
     return NextResponse.json(newResult, { status: 200 });
