@@ -45,6 +45,10 @@ export async function POST(request: NextRequest) {
 
     if (!key) return acc;
 
+    if (!elem.usabilityRecommendation) {
+      return acc; // Skip elements without usability recommendations
+    }
+
     if (!acc[key]) {
       acc[key] = [];
     }

@@ -150,6 +150,13 @@ export default function Home() {
       status: status,
     }));
 
+    console.log(elementRec);
+    const flatRec = elementRec.flatMap((rec) => {
+      return rec.data.map((r) => ({
+        elementId: r.id,
+        status: r.selectionStatus ?? null,
+      }));
+    });
     let input: SavedResultType = {
       name: websiteName,
       generalisedRecommendations: generalisedRecommendations,
@@ -159,7 +166,7 @@ export default function Home() {
       notSuitableElements: selectedUnusableElements,
       savedUsabilityRecommendationsForGamificationElementsWcag:
         selectedWCAGRecommendations,
-      savedElementUsabilityRecommendations: elementUsabilityStatusArray,
+      savedElementUsabilityRecommendations: flatRec,
     };
     console.log("Input to save:", input);
     fetch("/api/saved-result/new", {

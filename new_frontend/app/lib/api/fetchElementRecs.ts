@@ -20,12 +20,12 @@ const fetchElementRecs = async (
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        gamificationElement: params.gamificationElement,
-        gamificationGoal: params.gamificationGoal,
-        usabilityGoal: params.usabilityGoal,
-        disorder: params.disorder,
-        applicationDomain: params.applicationDomain,
-        ageGroup: params.ageGroup,
+        gamificationElement: params.gamificationElement && !params.gamificationElement.includes("Not applicable") ? params.gamificationElement : [],
+        gamificationGoal: params.gamificationGoal && !params.gamificationGoal.includes("Not applicable") ? params.gamificationGoal : [],
+        usabilityGoal: params.usabilityGoal && !params.usabilityGoal.includes("Not applicable") ? params.usabilityGoal : [],
+        disorder: params.disorder && !params.disorder.includes("Not applicable") ? params.disorder : [],
+        applicationDomain: params.applicationDomain && !params.applicationDomain.includes("Not applicable") ? params.applicationDomain : [],
+        ageGroup: params.ageGroup && !params.ageGroup.includes("Not applicable") ? params.ageGroup : [],
       }),
     });
 

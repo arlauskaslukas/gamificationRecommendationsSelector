@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     savedUsabilityRecommendationsForGamificationElementsWcag,
     savedElementUsabilityRecommendations,
   }: SavedResultType = await req.json();
+  console.log("Received data:", savedElementUsabilityRecommendations);
 
   if (!name || !generalisedRecommendations || !elements) {
     return NextResponse.json(
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
           selectionStatus: rec.status ?? null,
         })),
       });
+
     const savedElements =
       await prisma.savedSuitableGamificationElements.createMany({
         data: elements.map((element) => ({

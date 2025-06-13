@@ -6,12 +6,14 @@ export async function POST(request: NextRequest) {
   let body = await request.json();
   body = {
     ...body,
-    ageGroup: body.ageGroup ?? [],
-    applicationDomain: body.applicationDomain ?? [],
-    disorder: body.disorder ?? [],
-    usabilityGoal: body.usabilityGoal ?? [],
-    gamificationGoal: body.gamificationGoal ?? [],
+    ageGroup: body.ageGroup && !body.ageGroup.includes('Not applicable') ? body.ageGroup : [],
+    applicationDomain: body.applicationDomain && !body.applicationDomain.includes('Not applicable') ? body.applicationDomain : [],
+    disorder: body.disorder && !body.disorder.includes('Not applicable') ? body.disorder : [],
+    usabilityGoal: body.usabilityGoal && !body.usabilityGoal.includes('Not applicable') ? body.usabilityGoal : [],
+    gamificationGoal: body.gamificationGoal && !body.gamificationGoal.includes('Not applicable') ? body.gamificationGoal : [],
   };
+
+
   const critArrays = [
     body.ageGroup,
     body.applicationDomain,
@@ -19,6 +21,8 @@ export async function POST(request: NextRequest) {
     body.usabilityGoal,
     body.gamificationGoal,
   ];
+
+  console.log(critArrays);
 
   const noFilters = critArrays.every((arr) => arr.length === 0);
 
@@ -30,9 +34,9 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      suitable: [],
+      suitable: allNames,
       notSuitable: [],
-      other: allNames,
+      other: [],
     });
   }
 

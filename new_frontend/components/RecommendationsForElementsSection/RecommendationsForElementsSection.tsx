@@ -160,6 +160,7 @@ export default function RecommendationsForElementsSection({
             })),
         ];
       });
+      console.log(res);
       res.forEach((el) => {
         el.usabilityRecommendations.forEach((r) => {
           handleElementUsabilityStatusChange(r.id, null);
@@ -276,36 +277,6 @@ export default function RecommendationsForElementsSection({
       <div className="flex flex-col gap-4">
         {recommendations.map((rec, index) => (
           <AccordionItem key={index} title={rec.element}>
-            <div className="py-3">
-              <p className="font-bold mb-1">Usability recommendations:</p>
-              <table className="text-sm w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left">Recommendation</th>
-                    <th className="text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rec.usabilityRecommendations.map((ur) => (
-                    <tr className="border" key={ur.id}>
-                      <td>{ur.recommendation}</td>
-                      <td className="space-x-2">
-                        {Object.values(RecommendationStatus).map((status) => (
-                          <RecStatusMark
-                            key={status}
-                            selected={elementUsabilityStatuses[ur.id] == status}
-                            value={status}
-                            onClick={(value: RecommendationStatus) => {
-                              handleElementUsabilityStatusChange(ur.id, value);
-                            }}
-                          />
-                        ))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
             {rec.recommendations.map((recommendation, index) => (
               <RecommendationElementCard
                 key={index}

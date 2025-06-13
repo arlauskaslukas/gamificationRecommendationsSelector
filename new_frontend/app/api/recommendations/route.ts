@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       {
         where: {
           gamificationElement: { in: elements },
-          disorder: disorders?.length ? { in: disorders } : undefined,
+          disorder: disorders?.length && !disorders.includes('Not applicable') ? { in: disorders } : undefined,
         },
         select: {
           id: true,

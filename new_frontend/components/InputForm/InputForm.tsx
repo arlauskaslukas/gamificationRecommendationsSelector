@@ -156,6 +156,7 @@ export default function InputForm({ criteria, onChange }: Props) {
     "Learnability",
     "Operability",
     "User error protection",
+    "Accessibility",
     "User interface aesthetics",
   ];
   const setField = (field: keyof Criteria) => (arr: string[]) => {
@@ -175,7 +176,7 @@ export default function InputForm({ criteria, onChange }: Props) {
     string[]
   >([]);
   const [disableUsabilityPrinciples, setDisableUsabilityPrinciples] =
-    useState(false);
+    useState(true);
 
   return (
     <div className="w-full border-1 border-black p-6 my-8">
@@ -246,7 +247,7 @@ export default function InputForm({ criteria, onChange }: Props) {
               options={ISOprinciples}
               selected={criteria.usabilityPrinciple}
               onChange={setField("usabilityPrinciple")}
-              placeholder="ISO 9241-110 principles"
+              placeholder="ISO 25010:2011 principles"
               disabled={disableUsabilityPrinciples}
             />
           </div>
