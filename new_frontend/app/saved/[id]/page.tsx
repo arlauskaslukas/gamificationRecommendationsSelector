@@ -207,7 +207,7 @@ export default function SavedResultPage() {
       });
     });
 
-    return `(Fit - ${fit}, Partial Fit - ${partialFit}, Non fit - ${nonFit}).`;
+    return `(Implemented - ${fit}, Partially implemented - ${partialFit}, Not implemented - ${nonFit}).`;
   };
 
   const getWcagRecommendationsQuantities = () => {
@@ -233,7 +233,7 @@ export default function SavedResultPage() {
       });
     });
 
-    return `(Fit - ${fit}, Partial Fit - ${partialFit}, Non fit - ${nonFit}).`;
+    return `(Implemented - ${fit}, Partially implemented - ${partialFit}, Not implemented - ${nonFit}).`;
   };
 
   const handleElementsChange = async (gid: number, status: boolean) => {
@@ -267,6 +267,38 @@ export default function SavedResultPage() {
 
     fetchData();
   }, [id]);
+
+  const getRecommendationsCountTextPerElement = (item: any) => {
+    const nonFitCount = item.recommendations.filter(
+      (rec: any) => rec.selectionStatus === RecommendationStatus.NON_FIT
+    ).length;
+    const partialFitCount = item.recommendations.filter(
+      (rec: any) => rec.selectionStatus === RecommendationStatus.PARTIAL_FIT
+    ).length;
+    const fitCount = item.recommendations.filter(
+      (rec: any) => rec.selectionStatus === RecommendationStatus.FIT
+    ).length;
+    const totalCount = item.recommendations.length;
+    const remainingToEvaluateCount =
+      totalCount - (nonFitCount + partialFitCount + fitCount);
+    return `(${fitCount} Implemented, ${partialFitCount} Partially implemented, ${nonFitCount} Not implemented). Total: ${totalCount}. Remaining to evaluate: ${remainingToEvaluateCount}.`;
+  };
+
+  const getUsabilityRecommendationsCountTextPerElement = (item: any) => {
+    const nonFitCount = item.data.filter(
+      (rec: any) => rec.selectionStatus === RecommendationStatus.NON_FIT
+    ).length;
+    const partialFitCount = item.data.filter(
+      (rec: any) => rec.selectionStatus === RecommendationStatus.PARTIAL_FIT
+    ).length;
+    const fitCount = item.data.filter(
+      (rec: any) => rec.selectionStatus === RecommendationStatus.FIT
+    ).length;
+    const totalCount = item.data.length;
+    const remainingToEvaluateCount =
+      totalCount - (nonFitCount + partialFitCount + fitCount);
+    return `(${fitCount} Implemented, ${partialFitCount} Partially implemented, ${nonFitCount} Not implemented). Total: ${totalCount}. Remaining to evaluate: ${remainingToEvaluateCount}.`;
+  };
 
   if (loading) return <div className="p-6 text-gray-700">Loading...</div>;
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
@@ -377,7 +409,12 @@ export default function SavedResultPage() {
           {data.RuleMetadataByRuleIdx.map((item: any, idx: any) => {
             console.log(item.data);
             return (
-              <AccordionItem title={item.element} key={idx}>
+              <AccordionItem
+                title={`${
+                  item.element
+                }. ${getUsabilityRecommendationsCountTextPerElement(item)}`}
+                key={idx}
+              >
                 <div className="grid grid-cols-2 gap-4">
                   {[...item.data]
                     .sort((a, b) => a.id - b.id)
@@ -414,7 +451,12 @@ export default function SavedResultPage() {
             (item: any, idx: any) => {
               if (item.recommendations.length > 0)
                 return (
-                  <AccordionItem key={idx} title={item.element}>
+                  <AccordionItem
+                    key={idx}
+                    title={`${
+                      item.element
+                    } ${getRecommendationsCountTextPerElement(item)}`}
+                  >
                     <div className="py-1 flex flex-row">
                       <p className="font-bold">
                         Usability recommendations:&nbsp;
@@ -458,7 +500,12 @@ export default function SavedResultPage() {
             (item: any, idx: any) => {
               if (item.recommendations.length > 0)
                 return (
-                  <AccordionItem key={idx} title={item.element}>
+                  <AccordionItem
+                    key={idx}
+                    title={`${
+                      item.element
+                    } ${getRecommendationsCountTextPerElement(item)}`}
+                  >
                     <div className="py-1 flex flex-row">
                       <p className="font-bold">
                         Usability recommendation:&nbsp;
