@@ -88,6 +88,15 @@ export async function POST(
 
     for (const rec of result.SavedElementUsabilityRecommendation) {
       const elementName = rec.suitableGamificationElements.gamificationElement!;
+      //check if element is selected
+      const ids = result.SavedSuitableGamificationElements.map((e) => ({
+        element: e.suitableGamificationElements.gamificationElement,
+        status: e.selected,
+      }));
+      const elementStatus = ids.find((e) => e.element === elementName)?.status;
+      if (!elementStatus) {
+        continue; // Skip if the element is not selected
+      }
       if (!groupingMap[elementName]) {
         groupingMap[elementName] = [];
       }
@@ -107,7 +116,14 @@ export async function POST(
       const element =
         rec.usabilityRecommendationsForGamificationElementsIso
           .gamificationElement!;
-
+      const ids = result.SavedSuitableGamificationElements.map((e) => ({
+        element: e.suitableGamificationElements.gamificationElement,
+        status: e.selected,
+      }));
+      const elementStatus = ids.find((e) => e.element === element)?.status;
+      if (!elementStatus) {
+        continue; // Skip if the element is not selected
+      }
       if (!groupISORecommendations.has(element)) {
         groupISORecommendations.set(element, []);
       }
@@ -151,6 +167,18 @@ export async function POST(
 
     result?.SavedUsabilityRecommendationsForGamificationElementsWcag22.forEach(
       (rec) => {
+        //check if the element is selected
+        const element =
+          rec.usabilityRecommendationsForGamificationElementsWcag22
+            .gamificationElement!;
+        const ids = result.SavedSuitableGamificationElements.map((e) => ({
+          element: e.suitableGamificationElements.gamificationElement,
+          status: e.selected,
+        }));
+        const elementStatus = ids.find((e) => e.element === element)?.status;
+        if (!elementStatus) {
+          return; // Skip if the element is not selected
+        }
         if (
           !groupWcagRecommendations.has(
             rec.usabilityRecommendationsForGamificationElementsWcag22

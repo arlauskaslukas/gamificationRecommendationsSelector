@@ -379,24 +379,26 @@ export default function SavedResultPage() {
             return (
               <AccordionItem title={item.element} key={idx}>
                 <div className="grid grid-cols-2 gap-4">
-                  {item.data.map((entry: any, index: number) => {
-                    return (
-                      <RuleMetadataInteractiveCard
-                        element={item.element}
-                        key={entry.id}
-                        data={entry}
-                        onStatusChange={(
-                          id: number,
-                          status: RecommendationStatus
-                        ) => {
-                          handleElemRecChange(
-                            entry.suitableGamificationElementsId,
-                            status
-                          );
-                        }}
-                      />
-                    );
-                  })}
+                  {[...item.data]
+                    .sort((a, b) => a.id - b.id)
+                    .map((entry: any, index: number) => {
+                      return (
+                        <RuleMetadataInteractiveCard
+                          element={item.element}
+                          key={entry.id}
+                          data={entry}
+                          onStatusChange={(
+                            id: number,
+                            status: RecommendationStatus
+                          ) => {
+                            handleElemRecChange(
+                              entry.suitableGamificationElementsId,
+                              status
+                            );
+                          }}
+                        />
+                      );
+                    })}
                 </div>
               </AccordionItem>
             );
@@ -470,7 +472,7 @@ export default function SavedResultPage() {
                       </ul>
                     </div>
                     <div className="flex flex-col gap-4">
-                      {item.recommendations.map((itemRec: any) => (
+                      {...item.recommendations.map((itemRec: any) => (
                         <RecommendationElementCard
                           key={itemRec.id}
                           title={itemRec.elementUsabilityRecommendation}
