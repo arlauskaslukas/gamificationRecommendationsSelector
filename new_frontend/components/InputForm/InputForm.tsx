@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, useState } from "react";
 import MultiSelectDropdown from "../MultiSelectDropdown/MultiSelectDropdown";
 import Checklist from "../Checklist/Checklist";
 import { Criteria } from "@/app/types/types";
@@ -118,6 +118,10 @@ export default function InputForm({ criteria, onChange }: Props) {
     { label: "sport (cyclotourism)", value: "sport (cyclotourism)" },
     { label: "medicine (healthy living)", value: "medicine (healthy living)" },
     { label: "medicine (rehabilitation)", value: "medicine (rehabilitation)" },
+    {
+      label: "Habits formation and productivity",
+      value: "Habits formation and productivity",
+    },
   ];
 
   const disorders = [
