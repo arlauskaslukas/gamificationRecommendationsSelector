@@ -120,7 +120,7 @@ export default function InputForm({ criteria, onChange }: Props) {
     { label: "medicine (rehabilitation)", value: "medicine (rehabilitation)" },
     {
       label: "Habits formation and productivity",
-      value: "Habits formation and productivity",
+      value: "habits formation and productivity",
     },
   ];
 
