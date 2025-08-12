@@ -3,7 +3,7 @@ import RecStatusMark from "../RecStatusMark/RecStatusMark";
 import SelectMark from "../SelectMark/SelectMark";
 
 type RecommendationItemCardProps = {
-  onClick: (value: RecommendationStatus) => void;
+  onClick: (value: RecommendationStatus | null) => void;
   title: string;
   index: number;
   example: string;
@@ -40,21 +40,21 @@ export default function RecommendationElementCard({
         <RecStatusMark
           selected={status == RecommendationStatus.NON_FIT}
           value={RecommendationStatus.NON_FIT}
-          onClick={(value: RecommendationStatus) => {
+          onClick={(value: RecommendationStatus | null) => {
             onClick(value);
           }}
         />
         <RecStatusMark
           selected={status == RecommendationStatus.PARTIAL_FIT}
           value={RecommendationStatus.PARTIAL_FIT}
-          onClick={(value: RecommendationStatus) => {
+          onClick={(value: RecommendationStatus | null) => {
             onClick(value);
           }}
         />
         <RecStatusMark
           selected={status == RecommendationStatus.FIT}
           value={RecommendationStatus.FIT}
-          onClick={(value: RecommendationStatus) => {
+          onClick={(value: RecommendationStatus | null) => {
             onClick(value);
           }}
         />

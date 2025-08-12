@@ -1,6 +1,4 @@
 "use client";
-import { useState } from "react";
-import SelectMark from "../SelectMark/SelectMark";
 import { RecommendationStatus } from "@prisma/client";
 import RecStatusMark from "../RecStatusMark/RecStatusMark";
 
@@ -15,8 +13,8 @@ type RecommendationItemCardProps = {
   usabilityGoal: string;
   gamificationGoal?: string;
   example: string;
-  status: RecommendationStatus;
-  onClick: (id: number, status: RecommendationStatus) => void;
+  status: RecommendationStatus | null; // <-- allow null
+  onClick: (id: number, status: RecommendationStatus | null) => void; // <-- allow null
 };
 
 export default function RecommendationItemCard({
@@ -40,6 +38,7 @@ export default function RecommendationItemCard({
           #{index} {title}
         </h3>
       </div>
+
       <div className="grid grid-cols-2 pt-2">
         <div className="w-full">
           <div className="flex flex-row items-start text-sm">
@@ -55,6 +54,7 @@ export default function RecommendationItemCard({
             <p>{disorder}</p>
           </div>
         </div>
+
         <div className="w-full">
           <div className="flex flex-row items-start text-sm">
             <p className="font-bold">Usability characteristic:&nbsp;</p>
@@ -64,37 +64,34 @@ export default function RecommendationItemCard({
             <p className="font-bold">Usability goal:&nbsp;</p>
             <p>{usabilityGoal}</p>
           </div>
+
           <div className="flex flex-row items-start text-sm">
             <p className="font-bold">Gamification goal:&nbsp;</p>
             <p>{gamificationGoal}</p>
           </div>
         </div>
       </div>
+
       <div className="flex flex-row text-[16px]">
         <p className="font-bold">Example:&nbsp;</p>
         <p>{example}</p>
       </div>
+
       <div className="flex flex-row gap-4">
         <RecStatusMark
-          selected={status == RecommendationStatus.NON_FIT}
+          selected={status === RecommendationStatus.NON_FIT}
           value={RecommendationStatus.NON_FIT}
-          onClick={(value: RecommendationStatus) => {
-            onClick(id, value);
-          }}
+          onClick={(value: RecommendationStatus | null) => onClick(id, value)}
         />
         <RecStatusMark
-          selected={status == RecommendationStatus.PARTIAL_FIT}
+          selected={status === RecommendationStatus.PARTIAL_FIT}
           value={RecommendationStatus.PARTIAL_FIT}
-          onClick={(value: RecommendationStatus) => {
-            onClick(id, value);
-          }}
+          onClick={(value: RecommendationStatus | null) => onClick(id, value)}
         />
         <RecStatusMark
-          selected={status == RecommendationStatus.FIT}
+          selected={status === RecommendationStatus.FIT}
           value={RecommendationStatus.FIT}
-          onClick={(value: RecommendationStatus) => {
-            onClick(id, value);
-          }}
+          onClick={(value: RecommendationStatus | null) => onClick(id, value)}
         />
       </div>
     </div>

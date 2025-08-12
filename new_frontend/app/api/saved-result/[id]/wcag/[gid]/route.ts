@@ -3,7 +3,7 @@ import { RecommendationStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 type RecommendationInput = {
-  status: RecommendationStatus;
+  status: RecommendationStatus | null;
 };
 
 export async function POST(

@@ -101,7 +101,7 @@ export default function RecommendationsForElementsSection({
   };
   const handleRecommendationSelect = (
     rec: RecRow,
-    status: RecommendationStatus
+    status: RecommendationStatus | null
   ) => {
     if (rec.recommendation.includes("ISO")) {
       let iso = selectedISORecommendations.map((r) =>
@@ -281,7 +281,7 @@ export default function RecommendationsForElementsSection({
               <RecommendationElementCard
                 key={index}
                 status={getItemSelectionStatus(recommendation)}
-                onClick={(value: RecommendationStatus) => {
+                onClick={(value: RecommendationStatus | null) => {
                   handleRecommendationSelect(recommendation, value);
                   console.log(getItemSelectionStatus(recommendation));
                 }}
@@ -323,7 +323,7 @@ export default function RecommendationsForElementsSection({
                           key={entry.id}
                           onStatusChange={(
                             id: number,
-                            status: RecommendationStatus
+                            status: RecommendationStatus | null
                           ) => {
                             handleElementUsabilityStatusChange(id, status);
                           }}

@@ -61,7 +61,7 @@ export default function SavedResultPage() {
 
   const handleGeneralisedRecommendationChange = async (
     gid: number,
-    status: RecommendationStatus
+    status: RecommendationStatus | null
   ) => {
     await fetch(`/api/saved-result/${id}/generalised/${gid}`, {
       method: "POST",
@@ -76,7 +76,7 @@ export default function SavedResultPage() {
 
   const handleElemRecChange = async (
     gid: number,
-    status: RecommendationStatus
+    status: RecommendationStatus | null
   ) => {
     await fetch(`/api/saved-result/${id}/element-usability/${gid}`, {
       method: "POST",
@@ -91,7 +91,7 @@ export default function SavedResultPage() {
 
   const handleIsoRecommendationChange = async (
     gid: number,
-    status: RecommendationStatus
+    status: RecommendationStatus | null
   ) => {
     await fetch(`/api/saved-result/${id}/iso/${gid}`, {
       method: "POST",
@@ -106,7 +106,7 @@ export default function SavedResultPage() {
 
   const handleWcagRecommendationChange = async (
     gid: number,
-    status: RecommendationStatus
+    status: RecommendationStatus | null
   ) => {
     await fetch(`/api/saved-result/${id}/wcag/${gid}`, {
       method: "POST",
@@ -426,7 +426,7 @@ export default function SavedResultPage() {
                           data={entry}
                           onStatusChange={(
                             id: number,
-                            status: RecommendationStatus
+                            status: RecommendationStatus | null
                           ) => {
                             handleElemRecChange(
                               entry.suitableGamificationElementsId,
@@ -477,7 +477,7 @@ export default function SavedResultPage() {
                           example={itemRec.example}
                           recommendationName={itemRec.recommendation}
                           index={itemRec.id}
-                          onClick={(value: RecommendationStatus) => {
+                          onClick={(value: RecommendationStatus | null) => {
                             handleIsoRecommendationChange(itemRec.id, value);
                           }}
                           status={itemRec.selectionStatus}
@@ -526,7 +526,7 @@ export default function SavedResultPage() {
                           example={itemRec.example}
                           recommendationName={itemRec.recommendation}
                           index={itemRec.id}
-                          onClick={(value: RecommendationStatus) => {
+                          onClick={(value: RecommendationStatus | null) => {
                             handleWcagRecommendationChange(itemRec.id, value);
                           }}
                           status={itemRec.selectionStatus}

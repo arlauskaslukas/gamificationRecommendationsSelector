@@ -1,10 +1,9 @@
 import { RecommendationStatus } from "@prisma/client";
-import { REACT_LOADABLE_MANIFEST } from "next/dist/shared/lib/constants";
 
 type SelectMarkToggleProps = {
   selected: boolean;
   value: RecommendationStatus;
-  onClick: (status: RecommendationStatus) => void;
+  onClick: (status: RecommendationStatus | null) => void;
 };
 
 type StatusStyle = {
@@ -37,17 +36,27 @@ const styleByStatus: Record<RecommendationStatus, StatusStyle> = {
   },
 };
 
-export default function RecStatusMark(props: SelectMarkToggleProps) {
+export default function RecStatusMark({
+  selected,
+  value,
+  onClick,
+}: SelectMarkToggleProps) {
+  const classes = `${
+    selected ? styleByStatus[value].selected : styleByStatus[value].unselected
+  } transition duration-300 ease-in-out border px-6 py-1 rounded-full`;
+
+  const handleClick = () => {
+    onClick(selected ? null : value);
+  };
+
   return (
     <button
-      className={`${
-        props.selected
-          ? styleByStatus[props.value].selected
-          : styleByStatus[props.value].unselected
-      } transition duration-300 ease-in-out border-1 px-6 py-1 rounded-full`}
-      onClick={() => props.onClick(props.value)}
+      type="button"
+      aria-pressed={selected}
+      className={classes}
+      onClick={handleClick}
     >
-      {labelByStatus[props.value]}
+      {labelByStatus[value]}
     </button>
   );
 }

@@ -16,7 +16,7 @@ type RuleMetadataInteractiveCardProps = {
       usabilityRecommendation: string;
     };
   };
-  onStatusChange: (id: number, newStatus: RecommendationStatus) => void;
+  onStatusChange: (id: number, newStatus: RecommendationStatus | null) => void;
 };
 
 export default function RuleMetadataInteractiveCard({
@@ -76,18 +76,18 @@ export default function RuleMetadataInteractiveCard({
             <p className="font-semibold">Gamification Goal:</p>
             <p>
               {data.suitableGamificationElements.gamificationGoal
-                ? data.suitableGamificationElements.ageGroup
+                ? data.suitableGamificationElements.gamificationGoal
                 : "Not applicable"}
             </p>
           </div>
         </div>
         <div className="flex flex-row gap-4 mt-2">
-          {Object.values(RecommendationStatus).map((status) => (
+          {Object.values(RecommendationStatus).map((status, id) => (
             <RecStatusMark
-              key={status}
+              key={id}
               selected={data.selectionStatus === status}
               value={status}
-              onClick={() => onStatusChange(data.id, status)}
+              onClick={(val) => onStatusChange(data.id, val)}
             />
           ))}
         </div>
